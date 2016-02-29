@@ -77,17 +77,17 @@ jetAna.minLepPt = 10
 jetAna.applyL2L3Residual = 'Data' 
 jetAna.jetPt = 0
 jetAna.jetEta = 5.2
-jetAna.addJECShifts = True
-jetAna.doQG = True
+jetAna.addJECShifts = False
+jetAna.doQG = False
 jetAna.smearJets = False #should be false in susycore, already
 
-jetAna.recalibrateJets =  True #For data #FIXME
-jetAna.calculateSeparateCorrections = True #should be true if recalibrate, otherwise L1 inconsistent
-#metAna.recalibrate = False 
+jetAna.recalibrateJets =  False #For data #FIXME
+jetAna.calculateSeparateCorrections = False #should be true if recalibrate, otherwise L1 inconsistent
 
-jetAna.calculateType1METCorrection = True
+jetAna.calculateType1METCorrection = False
 jetAna.dataGT   = "Summer15_25nsV6_DATA"
-metAna.recalibrate = "type1"
+
+metAna.recalibrate = False 
 
 isoTrackAna.setOff=False
 genAna.allGenTaus = True
@@ -249,7 +249,7 @@ sequence = cfg.Sequence(
         treeProducer,
         ])
 
-isData = True
+isData = False
 #bx = '50ns'
 bx = '25ns'
 #isFastSim = False
@@ -270,10 +270,10 @@ if getHeppyOption("loadSamples"):
 #        comp.files = comp.files[:1]
 #        comp.splitFactor = len(comp.files)
 #    else: 
-      selectedComponents = [TTJets_LO]
+      selectedComponents = [QCD_Pt_15to3000]
       for comp in selectedComponents:
-        comp.files = comp.files[:1]
-        comp.splitFactor = len(comp.files)
+#        comp.files = comp.files[:1]
+        comp.splitFactor = 10
   if isData and bx=='25ns':
     #JetHT_260431_M2_5_500, JetHT_260431,
     selectedComponents = [ JetHT_260431 ]

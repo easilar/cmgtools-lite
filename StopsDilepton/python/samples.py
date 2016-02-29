@@ -14,16 +14,43 @@ kreator = ComponentCreator()
 ### ----------------------------- summary ----------------------------------------
 
 samples_stopsDilepton = []
-JetHT_260431_M2_5_500 = kreator.makeMyPrivateMCComponent("JetHT_260431_M2_5_500", "/JetHT/schoef-crab_JetHT_Run2015D_M2_5_500_lumiBased_reduced-8e13882dc7c4566a38618e8b59bae173/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=False)
-JetHT_260431          = kreator.makeMyPrivateMCComponent("JetHT_260431", "/JetHT/schoef-crab_JetHT_Run2015D_lumiBased_reduced-4fff70efe810c67b5c65aa7d4a7cd41d/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=False)
 
-samples_private = [
+JetHT_260431_M2_5_500 = kreator.makeMyPrivateMCComponent("JetHT_260431_M2_5_500", "/JetHT/schoef-crab_JetHT_Run2015D_M2_5_500_lumiBased_reduced-8e13882dc7c4566a38618e8b59bae173/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=True)
+JetHT_260431          = kreator.makeMyPrivateMCComponent("JetHT_260431", "/JetHT/schoef-crab_JetHT_Run2015D_lumiBased_reduced-4fff70efe810c67b5c65aa7d4a7cd41d/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=True)
+
+samples_data_private = [
 JetHT_260431_M2_5_500,
 JetHT_260431,
 ]
 
 
-samples = samples_stopsDilepton + samples_private 
+QCD_Pt_15to3000 = kreator.makeMyPrivateMCComponent("QCD_Pt_15to3000", "/QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8/schoef-crab_QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8-5dafd396af9e4f54f380247389303774/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=True)
+QCD_Pt_15to3000_M2_5_500 = kreator.makeMyPrivateMCComponent("QCD_Pt_15to3000_M2_5_500", "/QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8/schoef-crab_QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8_M2_5_500-5dafd396af9e4f54f380247389303774/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=True)
+
+QCD_Pt_15to3000_M0   = kreator.makeMyPrivateMCComponent("QCD_Pt_15to3000_M0", "/QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8/schoef-crab_QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8_M0-5dafd396af9e4f54f380247389303774/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=True)
+QCD_Pt_15to3000_M21p = kreator.makeMyPrivateMCComponent("QCD_Pt_15to3000_M21p", "/QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8/schoef-crab_QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8_M21p-5dafd396af9e4f54f380247389303774/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=True)
+QCD_Pt_15to3000_M23p = kreator.makeMyPrivateMCComponent("QCD_Pt_15to3000_M23p", "/QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8/schoef-crab_QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8_M23p-5dafd396af9e4f54f380247389303774/USER", "PRIVATE", ".*root", "phys03", 1, useAAA=True)
+
+
+samples_mc_private = [
+QCD_Pt_15to3000,
+QCD_Pt_15to3000_M2_5_500,
+QCD_Pt_15to3000_M0,
+QCD_Pt_15to3000_M21p,
+QCD_Pt_15to3000_M23p,
+]
+
+
+
+samples = samples_stopsDilepton + samples_data_private + samples_mc_private
+
+for sample in samples_mc_private:
+    sample.isMC = True 
+    sample.isData = False
+
+for sample in samples_data_private:
+    sample.isMC = False
+    sample.isData = True
 
 ### ---------------------------------------------------------------------
 
@@ -32,10 +59,7 @@ dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"
 
 #Define splitting
 for comp in samples:
-    comp.isMC = False
-    comp.isData = True
     comp.splitFactor = 250 
     comp.puFileMC=dataDir+"/puProfile_Summer12_53X.root"
     comp.puFileData=dataDir+"/puProfile_Data12.root"
     comp.efficiency = eff2012
-
