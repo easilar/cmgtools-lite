@@ -77,15 +77,16 @@ jetAna.minLepPt = 10
 jetAna.applyL2L3Residual = 'Data' 
 jetAna.jetPt = 0
 jetAna.jetEta = 5.2
-jetAna.addJECShifts = False
+jetAna.addJECShifts = True
 jetAna.doQG = False
 jetAna.smearJets = False #should be false in susycore, already
 
-jetAna.recalibrateJets =  False #For data #FIXME
-jetAna.calculateSeparateCorrections = False #should be true if recalibrate, otherwise L1 inconsistent
+jetAna.recalibrateJets =  True #For data #FIXME
+jetAna.calculateSeparateCorrections = True #should be true if recalibrate, otherwise L1 inconsistent
 
 jetAna.calculateType1METCorrection = False
-jetAna.dataGT   = "Summer15_25nsV6_DATA"
+jetAna.dataGT   = "Fall15_25nsV2_DATA"
+jetAna.mcGT   = "Fall15_25nsV2_MC"
 
 metAna.recalibrate = False 
 
@@ -106,26 +107,6 @@ susyCoreSequence.insert(susyCoreSequence.index(ttHCoreEventAna),
 
 from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
 LHEAna = LHEAnalyzer.defaultConfig
-
-
-### Single lepton + ST skim
-#from CMGTools.TTHAnalysis.analyzers.ttHSTSkimmer import ttHSTSkimmer
-#ttHSTSkimmer = cfg.Analyzer(
-#    ttHSTSkimmer, name='ttHSTSkimmer',
-#    minST = 200,
-#    )
-
-#from CMGTools.TTHAnalysis.analyzers.ttHReclusterJetsAnalyzer import ttHReclusterJetsAnalyzer
-#ttHReclusterJets = cfg.Analyzer(
-#    ttHReclusterJetsAnalyzer, name="ttHReclusterJetsAnalyzer",
-#    pTSubJet = 30,
-#    etaSubJet = 5.0,
-#            )
-from CMGTools.TTHAnalysis.analyzers.hbheAnalyzer import hbheAnalyzer
-hbheFilterAna = cfg.Analyzer(
-    hbheAnalyzer, name = 'hbheAnalyzer',
-    IgnoreTS4TS5ifJetInLowBVRegion = False
-)
 
 
 from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import *
@@ -243,40 +224,29 @@ selectedComponents = [
 
 sequence = cfg.Sequence(
   susyCoreSequence+
-      [ hbheFilterAna,
-        LHEAna,
+      [ LHEAna,
         ttHEventAna,
         treeProducer,
         ])
 
-isData = False
+isData = True
 #bx = '50ns'
 bx = '25ns'
 #isFastSim = False
 
-#hbheFilterAna.isFastSim = isFastSim
-#assert not (isData and isFastSim), "Provided 'isFastSim' when running on data."
-#if isFastSim: jetAna.mcGT = "FastSim_Summer15_25nsV6_MC" 
-
 #if True or getHeppyOption("loadSamples"):
 if getHeppyOption("loadSamples"):
   from CMGTools.RootTools.samples.samples_13TeV_RunIIFall15MiniAODv2 import *
+  from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
   from CMGTools.StopsDilepton.samples import *
 
   if not isData and bx=='25ns':
-#    if isFastSim:
-#      selectedComponents = [SMS_T2tt_mStop500_525_550_mLSP1to425_325to450_1to475]
-#      for comp in selectedComponents:
-#        comp.files = comp.files[:1]
-#        comp.splitFactor = len(comp.files)
-#    else: 
-      selectedComponents = [QCD_Pt_15to3000]
+      selectedComponents = [TTJets]
       for comp in selectedComponents:
-#        comp.files = comp.files[:1]
+        comp.files = comp.files[:1]
         comp.splitFactor = 10
   if isData and bx=='25ns':
-    #JetHT_260431_M2_5_500, JetHT_260431,
-    selectedComponents = [ JetHT_260431 ]
+    selectedComponents = [ DoubleMuon_Run2015B_05Oct ]
     for comp in selectedComponents:
         comp.splitFactor = 1
         comp.files = comp.files[10:11]

@@ -72,10 +72,6 @@ susySingleLepton_globalVariables = susyCore_globalVariables + [
             NTupleVariable("lheHTIncoming", lambda ev : ev.lheHTIncoming, help="H_{T} computed from quarks and gluons in Heppy LHEAnalyzer (only LHE status<0 as mothers)", mcOnly=True),
             NTupleVariable("LHEweight_original", lambda ev: ev.LHE_originalWeight if hasattr(ev,'LHE_originalWeight') else 0, mcOnly=True, help="original LHE weight"),
             # ----------------------- MET filter information (temporary)  -------------------------------------------------------------------- #
-
-            NTupleVariable("Flag_HBHENoiseFilterReRun", lambda ev: ev.hbheFilterNew, help="HBEHE temporary filter decision"),
-            NTupleVariable("Flag_HBHEIsoNoiseFilterReRun", lambda ev: ev.hbheFilterIso, help="HBEHE isolation temporary filter decision"),
-
 ]
 susySingleLepton_globalObjects = susyCore_globalObjects.copy()
 susySingleLepton_globalObjects.update({
