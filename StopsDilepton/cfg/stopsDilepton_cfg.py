@@ -229,30 +229,18 @@ sequence = cfg.Sequence(
         treeProducer,
         ])
 
-isData = True
-#bx = '50ns'
-bx = '25ns'
-#isFastSim = False
-
 #if True or getHeppyOption("loadSamples"):
 if getHeppyOption("loadSamples"):
-  from CMGTools.RootTools.samples.samples_13TeV_RunIIFall15MiniAODv2 import *
-  from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
-  from CMGTools.StopsDilepton.samples import *
+    from CMGTools.RootTools.samples.samples_13TeV_RunIIFall15MiniAODv2 import *
+    from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
+    for sample in dataSamples_Run2015D_16Dec:
+        sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt"
+    from CMGTools.StopsDilepton.samples import *
 
-  if not isData and bx=='25ns':
-      selectedComponents = [TTJets]
-      for comp in selectedComponents:
-        comp.files = comp.files[:1]
-        comp.splitFactor = 10
-  if isData and bx=='25ns':
-    selectedComponents = [ DoubleMuon_Run2015B_05Oct ]
+    selectedComponents = [TTJets, DoubleMuon_Run2015D_16Dec]
     for comp in selectedComponents:
-        comp.splitFactor = 1
-        comp.files = comp.files[10:11]
-        comp.json = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_Silver_v2.txt"
-        comp.isMC = False
-        comp.isData = True
+            comp.files = comp.files[:1]
+            comp.splitFactor = 1
 
 from CMGTools.TTHAnalysis.tools.EOSEventsWithDownload import EOSEventsWithDownload
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
