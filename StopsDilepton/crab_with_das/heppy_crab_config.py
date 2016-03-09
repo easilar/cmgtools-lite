@@ -48,6 +48,12 @@ config.Data.unitsPerJob = 1
 config.section_("Site")
 #config.Site.blacklist = ['T2_US_Purdue', 'T2_BE_IIHE', 'T2_US_Wisconsin', 'T2_UK_SGrid_Bristol', 'T2_US_Nebraska', 'T2_US_UCSD', 'T2_US_Florida', 'T2_US_Caltech', 'T2_UK_London_IC', 'T2_KR_KNU', 'T2_IT_Legnaro', 'T2_US_UCSD']
 #config.Site.whitelist=  ['T2_DE_DESY', 'T2_FR_IPHC', 'T2_BE_UCL', 'T2_CH_CERN', 'T2_BR_SPRACE', 'T2_FR_IPHC', 'T2_CH_CSCS', 'T2_FR_GRIF_LLR', 'T2_AT_Vienna', 'T3_KR_KISTI',]
-config.Site.storageSite = 'T2_AT_Vienna'
+
+if os.environ['USER'] in ['schoef', 'rschoefbeck', 'schoefbeck']:
+  config.Site.storageSite = 'T2_AT_Vienna'
 #config.Data.ignoreLocality = True
 
+if os.environ['USER'] in ['tomc']: #T2_BE specific configuration
+  config.Site.storageSite = 'T2_BE_IIHE'
+  config.section_("User")
+  config.User.voGroup = 'becms'

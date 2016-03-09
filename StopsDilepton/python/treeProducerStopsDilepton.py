@@ -75,7 +75,7 @@ susySingleLepton_globalVariables = susyCore_globalVariables + [
 ]
 susySingleLepton_globalObjects = susyCore_globalObjects.copy()
 susySingleLepton_globalObjects.update({
-            # put more here
+            "metPuppi" : NTupleObject("puppiMet", metType, help="Puppi E_{T}^{miss}"),
 })
 
 susySingleLepton_collections =  susyCore_collections.copy()
