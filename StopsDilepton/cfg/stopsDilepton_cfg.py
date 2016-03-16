@@ -75,7 +75,7 @@ ttHLepSkim.maxLeptons = 999
 # --- JET-LEPTON CLEANING ---
 jetAna.minLepPt = 10
 jetAna.applyL2L3Residual = 'Data' 
-jetAna.jetPt = 0
+jetAna.jetPt = 30
 jetAna.jetEta = 5.2
 jetAna.addJECShifts = True
 jetAna.doQG = False
