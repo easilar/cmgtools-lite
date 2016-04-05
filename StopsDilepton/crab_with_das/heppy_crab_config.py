@@ -43,7 +43,7 @@ config.Data.publication = False
 #config.Data.totalUnits = 5
 #config.Data.unitsPerJob = 5
 #config.Data.totalUnits = 2
-config.Data.unitsPerJob = 1
+config.Data.unitsPerJob = 5
 
 config.section_("Site")
 #config.Site.blacklist = ['T2_US_Purdue', 'T2_BE_IIHE', 'T2_US_Wisconsin', 'T2_UK_SGrid_Bristol', 'T2_US_Nebraska', 'T2_US_UCSD', 'T2_US_Florida', 'T2_US_Caltech', 'T2_UK_London_IC', 'T2_KR_KNU', 'T2_IT_Legnaro', 'T2_US_UCSD']

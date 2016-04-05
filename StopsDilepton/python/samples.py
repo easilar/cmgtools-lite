@@ -35,12 +35,12 @@ QCD_Pt_15to3000_M23p = kreator.makeMyPrivateMCComponent("QCD_Pt_15to3000_M23p", 
 samples_mc_private = [
 QCD_Pt_15to3000,
 QCD_Pt_15to3000_M2_5_500,
+#QCD_Pt_15to3000_M2_0_500,
+#QCD_Pt_15to3000_M2_5_100,
 QCD_Pt_15to3000_M0,
 QCD_Pt_15to3000_M21p,
 QCD_Pt_15to3000_M23p,
 ]
-
-
 
 samples = samples_stopsDilepton + samples_data_private + samples_mc_private
 
