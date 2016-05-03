@@ -264,10 +264,10 @@ if getHeppyOption("loadSamples"):
     from CMGTools.StopsDilepton.samples import *
 
 #    selectedComponents = [TTJets, DoubleMuon_Run2015D_16Dec]
-    selectedComponents = [QCD_Pt_15to3000_M2_0_500, QCD_Pt_15to3000_M2_5_100]
+    selectedComponents = [ QCD_Pt_15to3000_M2_0_500 ] #, QCD_Pt_15to3000_M2_5_100]
     for comp in selectedComponents:
-#            comp.files = comp.files[:1]
-            comp.splitFactor = 7
+            comp.files = comp.files[:1]
+            comp.splitFactor = 1
 
 from CMGTools.TTHAnalysis.tools.EOSEventsWithDownload import EOSEventsWithDownload
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
