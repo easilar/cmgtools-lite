@@ -1,5 +1,4 @@
 import PhysicsTools.HeppyCore.framework.config as cfg
-from CMGTools.Production import eostools
 from CMGTools.Production.dataset import createDataset, createMyDataset
 import re
 
@@ -65,6 +64,7 @@ class ComponentCreator(object):
         return component
 
     def getFilesFromEOS(self,name,dataset,path,pattern=".*root"):
+        from CMGTools.Production import eostools
         from CMGTools.Production.dataset import getDatasetFromCache, writeDatasetToCache
         if "%" in path: path = path % dataset;
         try:
@@ -89,6 +89,7 @@ class ComponentCreator(object):
         return component
 
     def getFilesFromPSI(self,name,dataset,path,pattern=".*root"):
+        from CMGTools.Production import eostools
         from CMGTools.Production.dataset import getDatasetFromCache, writeDatasetToCache
         if "%" in path: path = path % dataset;
         try:
@@ -131,6 +132,7 @@ class ComponentCreator(object):
         return component
 
     def getFilesFromLocal(self,name,dataset,path,pattern=".*root"):
+        from CMGTools.Production import eostools
         from CMGTools.Production.dataset import getDatasetFromCache, writeDatasetToCache
         if "%" in path: path = path % dataset;
         try:

@@ -6,8 +6,6 @@ import re
 import pickle
 import sys
 
-from CMGTools.Production.castorBaseDir import castorBaseDir
-import CMGTools.Production.eostools as castortools
 import fnmatch
 
 class IntegrityCheckError(Exception):
@@ -508,6 +506,8 @@ def createDataset( user, dataset, pattern, readcache=False,
             data = LocalDataset( dataset, basedir, pattern)
             info = False
         else:
+            import CMGTools.Production.eostools as castortools
+            from CMGTools.Production.castorBaseDir import castorBaseDir
             data = Dataset( dataset, user, pattern)
         writeCache(data, dataset, user, pattern, run_range, json)
     return data
