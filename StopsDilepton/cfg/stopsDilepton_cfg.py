@@ -14,7 +14,7 @@ lepAna.packedCandidates = 'packedPFCandidates'
 
 ## ELECTRONS
 lepAna.loose_electron_pt  = 5
-eleID = "MVAID"
+eleID = "CBID"
 
 if eleID == "CBID":
   lepAna.loose_electron_id  = "POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5"
@@ -66,7 +66,7 @@ elif isolation == "relIso03":
   lepAna.loose_muon_relIso = 0.5
 
 # --- LEPTON SKIMMING ---
-ttHLepSkim.minLeptons = 1
+ttHLepSkim.minLeptons = 2
 ttHLepSkim.maxLeptons = 999
 #LepSkim.idCut  = ""
 #LepSkim.ptCuts = []
@@ -85,7 +85,7 @@ jetAna.calculateSeparateCorrections = True #should be true if recalibrate, other
 
 jetAna.calculateType1METCorrection = False
 jetAna.dataGT   = "Fall15_25nsV2_DATA"
-jetAna.mcGT   = "Fall15_25nsV2_MC"
+jetAna.mcGT   = "Spring16_25nsV1_MC"
 
 metAna.recalibrate = False 
 
@@ -256,13 +256,13 @@ sequence = cfg.Sequence(
 
 #if True or getHeppyOption("loadSamples"):
 if getHeppyOption("loadSamples"):
-    from CMGTools.RootTools.samples.samples_13TeV_RunIIFall15MiniAODv2 import *
+    from CMGTools.RootTools.samples.samples_13TeV_RunIISpring16MiniAODv2 import *
     from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
     for sample in dataSamples_Run2015D_16Dec:
         sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt"
     from CMGTools.StopsDilepton.samples import *
 
-    selectedComponents = [TTJets, DoubleMuon_Run2015D_16Dec]
+    selectedComponents = [TTJets]
     #selectedComponents = [QCD_Pt_15to3000_M2_0_500, QCD_Pt_15to3000_M2_5_100]
     for comp in selectedComponents:
             comp.files = comp.files[:1]
