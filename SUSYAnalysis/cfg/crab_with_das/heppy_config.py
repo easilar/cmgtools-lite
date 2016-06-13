@@ -201,8 +201,8 @@ genAna.allGenTaus = True
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-#sample = 'MC'
-sample = 'data'
+sample = 'MC'
+#sample = 'data'
 #sample = 'Signal'
 test = 0
 
@@ -428,15 +428,15 @@ sequence = cfg.Sequence(susyCoreSequence+[
 		LHEAna,
 		ttHEventAna,
 #		ttHSTSkimmer,
-#		ttHHTSkimmer,
+		ttHHTSkimmer,
 		hbheFilterAna,
 		treeProducer,
 #		susyCounter
 		])
 
 # remove skimming for Data or Signal
-#if isData:# or isSignal :
-#	sequence.remove(ttHHTSkimmer)
+if isData:# or isSignal :
+	sequence.remove(ttHHTSkimmer)
 #	sequence.remove(ttHSTSkimmer)
 
 if isSignal:
