@@ -85,7 +85,7 @@ jetAna.calculateSeparateCorrections = True #should be true if recalibrate, other
 
 jetAna.calculateType1METCorrection = False
 jetAna.dataGT   = "Fall15_25nsV2_DATA"
-jetAna.mcGT   = "Spring16_25nsV1_MC"
+jetAna.mcGT   = "Spring16_25nsV3_DATA"
 
 metAna.recalibrate = False 
 
@@ -257,12 +257,12 @@ sequence = cfg.Sequence(
 #if True or getHeppyOption("loadSamples"):
 if getHeppyOption("loadSamples"):
     from CMGTools.RootTools.samples.samples_13TeV_RunIISpring16MiniAODv2 import *
-    from CMGTools.RootTools.samples.samples_13TeV_DATA2015 import *
-    for sample in dataSamples_Run2015D_16Dec:
-        sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt"
+    from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *
+    for sample in dataSamples_Run2016_v2:
+        sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt"
     from CMGTools.StopsDilepton.samples import *
 
-    selectedComponents = [TTJets]
+    selectedComponents = [DoubleEG_Run2016B_PromptReco_v2]
     #selectedComponents = [QCD_Pt_15to3000_M2_0_500, QCD_Pt_15to3000_M2_5_100]
     for comp in selectedComponents:
             comp.files = comp.files[:1]

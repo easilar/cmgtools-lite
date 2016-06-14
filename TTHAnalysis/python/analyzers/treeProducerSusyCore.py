@@ -1,6 +1,8 @@
 from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import * 
 
 susyCore_globalVariables = [
+            NTupleVariable("Flag_badChargedHadron",  lambda ev: not ev.badChargedHadron, int, help="badChargedHadron filter result"),
+
             NTupleVariable("rho",  lambda ev: ev.rho, float, help="kt6PFJets rho"),
             NTupleVariable("rhoCN",  lambda ev: ev.rhoCN, float, help="fixed grid rho central neutral"),
             NTupleVariable("nVert",  lambda ev: len(ev.goodVertices), int, help="Number of good vertices"), 

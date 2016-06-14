@@ -137,6 +137,14 @@ pdfwAna = cfg.Analyzer(
     PDFWeights = [ pdf for pdf,num in PDFWeights ]
     )
 
+# bad charged track filter
+from CMGTools.TTHAnalysis.analyzers.badChargedHadronAnalyzer import badChargedHadronAnalyzer
+badChargedHadronAna = cfg.Analyzer(
+    badChargedHadronAnalyzer, name = 'badChargedHadronAna',
+    muons='slimmedMuons',
+    packedCandidates = 'packedPFCandidates',
+)
+
 # Save SUSY masses
 from CMGTools.TTHAnalysis.analyzers.susyParameterScanAnalyzer import susyParameterScanAnalyzer
 susyScanAna = cfg.Analyzer(
@@ -495,6 +503,7 @@ susyCoreSequence = [
     genHiggsAna,
     genHFAna,
     pdfwAna,
+    badChargedHadronAna,
     susyScanAna,
     vertexAna,
     lepAna,
