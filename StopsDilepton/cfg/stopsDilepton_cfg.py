@@ -84,8 +84,8 @@ jetAna.recalibrateJets =  True #For data #FIXME
 jetAna.calculateSeparateCorrections = True #should be true if recalibrate, otherwise L1 inconsistent
 
 jetAna.calculateType1METCorrection = False
-jetAna.dataGT   = "Fall15_25nsV2_DATA"
-jetAna.mcGT   = "Spring16_25nsV3_DATA"
+jetAna.dataGT   = "Spring16_25nsV3_DATA"
+jetAna.mcGT   = "Spring16_25nsV3_MC"
 
 metAna.recalibrate = False 
 
@@ -262,10 +262,10 @@ if getHeppyOption("loadSamples"):
         sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt"
     from CMGTools.StopsDilepton.samples import *
 
-    selectedComponents = [DoubleEG_Run2016B_PromptReco_v2]
+    selectedComponents = [TTJets, DoubleEG_Run2016B_PromptReco_v2]
     #selectedComponents = [QCD_Pt_15to3000_M2_0_500, QCD_Pt_15to3000_M2_5_100]
     for comp in selectedComponents:
-            comp.files = comp.files[:1]
+            comp.files = comp.files[:5]
             comp.splitFactor = 1
 
 from CMGTools.TTHAnalysis.tools.EOSEventsWithDownload import EOSEventsWithDownload
