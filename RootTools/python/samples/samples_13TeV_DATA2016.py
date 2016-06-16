@@ -9,10 +9,9 @@ kreator = ComponentCreator()
 ### ----------------------------- Zero Tesla run  ----------------------------------------
 
 dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
-json=dataDir+'/json/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.txt'
-#https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/
-#https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2657.html
-#with recorded luminosity: 804.2/pb
+json=dataDir+'/json/Cert_246908-256869_13TeV_PromptReco_Collisions15_25ns_JSON.txt'
+#https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2496.html
+#golden JSON 166.37/pb 
 
 
 #jetHT_0T = cfg.DataComponent(
@@ -26,7 +25,8 @@ json=dataDir+'/json/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.txt'
 #    )
 
 
-run_range = (271036, 274240)
+# PromptReco-v1 for run > 251561
+run_range = (251643, 251883)
 label = "_runs%s_%s"%(run_range[0], run_range[1])
 
 ### ----------------------------- Run2016 PromptReco v1 ----------------------------------------
@@ -55,9 +55,7 @@ DoubleEG_Run2016B_PromptReco_v2       = kreator.makeDataComponent("DoubleEG_Run2
 MuonEG_Run2016B_PromptReco_v2        = kreator.makeDataComponent("MuonEG_Run2016B_PromptReco_v2"        , "/MuonEG/Run2016B-PromptReco-v2/MINIAOD"        , "CMS", ".*root", json)
 DoubleMuon_Run2016B_PromptReco_v2     = kreator.makeDataComponent("DoubleMuon_Run2016B_PromptReco_v2"    , "/DoubleMuon/Run2016B-PromptReco-v2/MINIAOD"    , "CMS", ".*root", json)
 
-JetHT_Run2016B_PromptReco_v2_HT800Only     = kreator.makeDataComponent("JetHT_Run2016B_PromptReco_v2_HT800Only"         , "/JetHT/Run2016B-PromptReco-v2/MINIAOD"         , "CMS", ".*root", json, triggers=['HLT_PFHT800_v*','HLT_PFHT400_v*'])
-
-dataSamples_Run2016_v2 = [JetHT_Run2016B_PromptReco_v2, HTMHT_Run2016B_PromptReco_v2, MET_Run2016B_PromptReco_v2, SingleElectron_Run2016B_PromptReco_v2, SingleMuon_Run2016B_PromptReco_v2, SinglePhoton_Run2016B_PromptReco_v2, DoubleEG_Run2016B_PromptReco_v2, MuonEG_Run2016B_PromptReco_v2, DoubleMuon_Run2016B_PromptReco_v2, JetHT_Run2016B_PromptReco_v2_HT800Only]
+dataSamples_Run2016_v2 = [JetHT_Run2016B_PromptReco_v2, HTMHT_Run2016B_PromptReco_v2, MET_Run2016B_PromptReco_v2, SingleElectron_Run2016B_PromptReco_v2, SingleMuon_Run2016B_PromptReco_v2, SinglePhoton_Run2016B_PromptReco_v2, DoubleEG_Run2016B_PromptReco_v2, MuonEG_Run2016B_PromptReco_v2, DoubleMuon_Run2016B_PromptReco_v2]
 
 ### ----------------------------- summary ----------------------------------------
 
