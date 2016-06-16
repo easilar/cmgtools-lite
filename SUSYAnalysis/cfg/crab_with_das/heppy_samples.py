@@ -5,7 +5,7 @@
 #from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import *
 #from CMGTools.RootTools.samples.triggers_13TeV_Spring15_1l import *
 from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *
-#from CMGTools.RootTools.samples.samples_13TeV_RunIISpring16MiniAODv2 import *
+from CMGTools.RootTools.samples.samples_13TeV_RunIISpring16MiniAODv2 import *
 
 ###applying the correct json files to PrompReco and July17 samples
 #for sample in dataSamples_Run2015B:

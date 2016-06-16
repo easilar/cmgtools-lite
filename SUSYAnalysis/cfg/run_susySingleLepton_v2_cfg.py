@@ -176,9 +176,9 @@ jetAna.minLepPt = 10
 
 ## JEC
 #jetAna.mcGT = "Summer15_25nsV6_MC"
-jetAna.mcGT = "Spring16_25nsV1_MC"
+jetAna.mcGT = "Spring16_25nsV3_MC"
 #jetAna.dataGT = "Summer15_25nsV6_DATA"
-jetAna.dataGT = "Spring16_25nsV1_MC"
+jetAna.dataGT = "Spring16_25nsV3_DATA"
 
 # add also JEC up/down shifts corrections
 jetAna.addJECShifts = True
@@ -201,8 +201,8 @@ genAna.allGenTaus = True
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-sample = 'MC'
-#sample = 'data'
+#sample = 'MC'
+sample = 'data'
 #sample = 'Signal'
 test = 1
 
@@ -335,14 +335,14 @@ elif sample == "data":
   ttHLepSkim.minLeptons = 0
 
   #For now no JEC  
-  print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
-  jetAna.addJECShifts = False
-  jetAna.doQG = False
-  jetAna.smearJets = False #should be false in susycore, already
-  jetAna.recalibrateJets = False # false for miniAOD v2!
-  jetAna.calculateSeparateCorrections = False
-  jetAna.applyL2L3Residual = False
-  print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
+  #print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
+  #jetAna.addJECShifts = False
+  #jetAna.doQG = False
+  #jetAna.smearJets = False #should be false in susycore, already
+  #jetAna.recalibrateJets = False # false for miniAOD v2!
+  #jetAna.calculateSeparateCorrections = False
+  #jetAna.applyL2L3Residual = False
+  #print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
 
   # central samples
   from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *
@@ -351,7 +351,7 @@ elif sample == "data":
 
   if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
   if test==1:
-    comp = JetHT_Run2016B_PromptReco_v2_HT800Only
+    comp = SingleElectron_Run2016B_PromptReco_v2
 #SingleElectron_Run2016B_PromptReco_v2
 #    comp.files = comp.files[:1]
 #    comp.files = comp.files[:1]
@@ -438,7 +438,7 @@ sequence = cfg.Sequence(susyCoreSequence+[
 # remove skimming for Data or Signal
 if isData:# or isSignal :
  sequence.remove(ttHHTSkimmer)
- sequence.remove(ttHSTSkimmer)
+# sequence.remove(ttHSTSkimmer)
 
 if isSignal:
 # sequence.remove(ttHHTSkimmer)
