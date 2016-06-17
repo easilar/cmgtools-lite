@@ -19,4 +19,4 @@ from CMGTools.RootTools.samples.samples_13TeV_RunIISpring16MiniAODv2 import *
 
 for sample in dataSamples_Run2016_v2:
   #sample.json = "$CMSSW_BASE/src/CMGTools/SUSYAnalysis/data/Cert_271036-273730_13TeV_PromptReco_Collisions16_JSON.txt"
-  sample.json = "$CMSSW_BASE/src/CMGTools/SUSYAnalysis/data/Cert_271036-274240_13TeV_PromptReco_Collisions16_JSON.txt"
+  sample.json = "$CMSSW_BASE/src/CMGTools/SUSYAnalysis/data/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON.txt"
