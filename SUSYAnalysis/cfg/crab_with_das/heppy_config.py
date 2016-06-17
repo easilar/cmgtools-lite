@@ -176,9 +176,9 @@ jetAna.minLepPt = 10
 
 ## JEC
 #jetAna.mcGT = "Summer15_25nsV6_MC"
-jetAna.mcGT = "Spring16_25nsV1_MC"
+jetAna.mcGT = "Spring16_25nsV3_MC"
 #jetAna.dataGT = "Summer15_25nsV6_DATA"
-jetAna.dataGT = "Spring16_25nsV1_MC"
+jetAna.dataGT = "Spring16_25nsV3_DATA"
 
 # add also JEC up/down shifts corrections
 jetAna.addJECShifts = True
@@ -201,8 +201,8 @@ genAna.allGenTaus = True
 #-------- HOW TO RUN
 isData = True # default, but will be overwritten below
 
-sample = 'MC'
-#sample = 'data'
+#sample = 'MC'
+sample = 'data'
 #sample = 'Signal'
 test = 0
 
@@ -337,14 +337,14 @@ elif sample == "data":
   ttHLepSkim.minLeptons = 0
 
   #For now no JEC  
-  print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
-  jetAna.addJECShifts = False
-  jetAna.doQG = False
-  jetAna.smearJets = False #should be false in susycore, already
-  jetAna.recalibrateJets = False # false for miniAOD v2!
-  jetAna.calculateSeparateCorrections = False
-  jetAna.applyL2L3Residual = False
-  print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
+  #print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
+  #jetAna.addJECShifts = False
+  #jetAna.doQG = False
+  #jetAna.smearJets = False #should be false in susycore, already
+  #jetAna.recalibrateJets = False # false for miniAOD v2!
+  #jetAna.calculateSeparateCorrections = False
+  #jetAna.applyL2L3Residual = False
+  #print jetAna.shiftJEC , jetAna.recalibrateJets , jetAna.addJECShifts , jetAna.calculateSeparateCorrections , jetAna.calculateType1METCorrection
 
 #  # central samples
 #  from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *

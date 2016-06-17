@@ -347,15 +347,15 @@ elif sample == "data":
   # central samples
   from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *
 
-  selectedComponents = [SingleElectron_Run2016B_PromptReco_v2, SingleMuon_Run2016B_PromptReco_v2, JetHT_Run2016B_PromptReco_v2_HT800Only]
+  selectedComponents = [SingleElectron_Run2016B_PromptReco_v2, SingleMuon_Run2016B_PromptReco_v2]
 
   if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
   if test==1:
     comp = SingleElectron_Run2016B_PromptReco_v2
 #SingleElectron_Run2016B_PromptReco_v2
 #    comp.files = comp.files[:1]
-#    comp.files = comp.files[:1]
-    comp.files = comp.files[10:11]
+    comp.files = comp.files[:1]
+#    comp.files = comp.files[10:11]
     selectedComponents = [comp]
     comp.splitFactor = 1
     comp.splitFactor = len(comp.files)
