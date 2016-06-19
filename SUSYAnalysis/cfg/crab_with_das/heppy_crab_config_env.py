@@ -21,8 +21,8 @@ print "sample = ",sample
 ##
 ## try to identify data
 ##
-#if m.group(2).startswith("Run201"):
-#  config.Data.splitting = "LumiBased"
+if m.group(2).startswith("Run201"):
+  config.Data.splitting = "LumiBased"
 
 #NJOBS=int(os.environ["NJOBS"])
 production_label = os.environ["CMG_PROD_LABEL"]
