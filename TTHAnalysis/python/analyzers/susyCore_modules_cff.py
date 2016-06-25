@@ -67,7 +67,7 @@ eventFlagsAna = cfg.Analyzer(
     triggerBits = {
         "HBHENoiseFilter" : [ "Flag_HBHENoiseFilter" ],
         "HBHENoiseIsoFilter" : [ "Flag_HBHENoiseIsoFilter" ],
-        "CSCTightHalo2016Filter" : [ "Flag_CSCTightHalo2016Filter" ],
+        "globalTightHalo2016Filter" : [ "Flag_globalTightHalo2016Filter" ],
         "CSCTightHalo2015Filter" : [ "Flag_CSCTightHalo2015Filter" ],
         "CSCTightHaloFilter" : [ "Flag_CSCTightHaloFilter" ],
         "hcalLaserEventFilter" : [ "Flag_hcalLaserEventFilter" ],
@@ -83,6 +83,20 @@ eventFlagsAna = cfg.Analyzer(
         "METFilters" : [ "Flag_METFilters" ],
     }
     )
+
+from CMGTools.TTHAnalysis.analyzers.badChargedHadronAnalyzer import badChargedHadronAnalyzer
+badChargedHadronAna = cfg.Analyzer(
+    badChargedHadronAnalyzer, name = 'badChargedHadronAna',
+    muons='slimmedMuons',
+    packedCandidates = 'packedPFCandidates',
+)
+
+from CMGTools.TTHAnalysis.analyzers.badMuonAnalyzer import badMuonAnalyzer
+badMuonAna = cfg.Analyzer(
+    badMuonAnalyzer, name = 'badMuonAna',
+    muons='slimmedMuons',
+    packedCandidates = 'packedPFCandidates',
+)
 
 # Select a list of good primary vertices (generic)
 vertexAna = cfg.Analyzer(
@@ -137,14 +151,6 @@ pdfwAna = cfg.Analyzer(
     PDFWeightsAnalyzer, name="PDFWeightsAnalyzer",
     PDFWeights = [ pdf for pdf,num in PDFWeights ]
     )
-
-# bad charged track filter
-from CMGTools.TTHAnalysis.analyzers.badChargedHadronAnalyzer import badChargedHadronAnalyzer
-badChargedHadronAna = cfg.Analyzer(
-    badChargedHadronAnalyzer, name = 'badChargedHadronAna',
-    muons='slimmedMuons',
-    packedCandidates = 'packedPFCandidates',
-)
 
 # Save SUSY masses
 from CMGTools.TTHAnalysis.analyzers.susyParameterScanAnalyzer import susyParameterScanAnalyzer
@@ -511,7 +517,6 @@ susyCoreSequence = [
     genHiggsAna,
     genHFAna,
     pdfwAna,
-    badChargedHadronAna,
     susyScanAna,
     vertexAna,
     lepAna,
@@ -529,4 +534,6 @@ susyCoreSequence = [
     # susyLeptonMatchAna,
     triggerFlagsAna,
     eventFlagsAna,
+    badMuonAna,
+    badChargedHadronAna,
 ]
