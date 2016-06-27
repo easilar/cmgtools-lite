@@ -11,4 +11,4 @@ from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *
 ##applying the correct json files to PrompReco and July17 samples
 
 for sample in dataSamples_Run2016_v2:
-    sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt"
+    sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt"

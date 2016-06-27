@@ -29,7 +29,6 @@ class badMuonAnalyzer( Analyzer ):
         suspiciousAlgo=14
         minMuPt = 100
         flagged = False
-
         event.crazyMuon = []
 
         for muon in self.handles['muons'].product():
@@ -54,9 +53,8 @@ class badMuonAnalyzer( Analyzer ):
                             event.crazyMuon.append(muon)
                             break
             if flagged: break
-
         event.badMuon = (not flagged)
-#        self.printInfo(event)
+        #self.printInfo(event)
         return True
 
     def printInfo(self, event):
