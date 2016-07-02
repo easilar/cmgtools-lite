@@ -141,7 +141,6 @@ triggerFlagsAna.triggerBits = {
         'IsoEle23' : triggers_1el23,
         'IsoEle22' : triggers_1el22,
         'Ele105' : trigger_1el_noiso,
-        'Ele':triggers_1e_25ns
         'EleHT600' : triggers_el_ht600,
         'EleHT400MET70' : triggers_el_ht400_met70,
         'EleHT350MET70' : triggers_el_ht350_met70,
@@ -266,12 +265,12 @@ if getHeppyOption("loadSamples"):
         sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt"
     from CMGTools.StopsDilepton.samples import *
 
-    #selectedComponents = [TTJets, DoubleEG_Run2016B_PromptReco_v2]
-    selectedComponents = [VVTo2L2Nu]
+    selectedComponents = [TTJets, DoubleEG_Run2016B_PromptReco_v2]
+    #selectedComponents = [VVTo2L2Nu]
     #selectedComponents = [QCD_Pt_15to3000_M2_0_500, QCD_Pt_15to3000_M2_5_100]
     for comp in selectedComponents:
-            #comp.files = comp.files[:5]
-            comp.splitFactor = 10
+            comp.files = comp.files[:1]
+            comp.splitFactor = 1
 
 from CMGTools.TTHAnalysis.tools.EOSEventsWithDownload import EOSEventsWithDownload
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events

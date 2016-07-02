@@ -1,4 +1,11 @@
 #!/bin/sh
+python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" DoubleEG_Run2016B_PromptReco_v2
+python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" MuonEG_Run2016B_PromptReco_v2
+python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" DoubleMuon_Run2016B_PromptReco_v2
+python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" JetHT_Run2016B_PromptReco_v2
+python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" SingleMuon_Run2016B_PromptReco_v2
+python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" SingleElectron_Run2016B_PromptReco_v2
+
 python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" TTJets
 python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" TT_pow_ext3
 python launch.py --remoteDir="80X_1l" --unitsPerJob=5 --production_label="80X_1l" TT_pow_ext4
