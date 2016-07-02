@@ -66,7 +66,7 @@ elif isolation == "relIso03":
   lepAna.loose_muon_relIso = 0.5
 
 # --- LEPTON SKIMMING ---
-ttHLepSkim.minLeptons = 2
+ttHLepSkim.minLeptons = 1
 ttHLepSkim.maxLeptons = 999
 #LepSkim.idCut  = ""
 #LepSkim.ptCuts = []
@@ -134,10 +134,14 @@ triggerFlagsAna.triggerBits = {
         'MuMET120' : triggers_mu_met120,
         'MuHT400B': triggers_mu_ht400_btag,
         ## electrons
+        'SingleEle': triggers_1e,
+        'SingleEle25ns': triggers_1e_25ns,
+        'SingleEle50ns': triggers_1e_50ns,
         'IsoEle32' : triggers_1el,
         'IsoEle23' : triggers_1el23,
         'IsoEle22' : triggers_1el22,
         'Ele105' : trigger_1el_noiso,
+        'Ele':triggers_1e_25ns
         'EleHT600' : triggers_el_ht600,
         'EleHT400MET70' : triggers_el_ht400_met70,
         'EleHT350MET70' : triggers_el_ht350_met70,
@@ -262,11 +266,12 @@ if getHeppyOption("loadSamples"):
         sample.json="$CMSSW_BASE/src/CMGTools/TTHAnalysis/data/json/Cert_271036-274421_13TeV_PromptReco_Collisions16_JSON.txt"
     from CMGTools.StopsDilepton.samples import *
 
-    selectedComponents = [TTJets, DoubleEG_Run2016B_PromptReco_v2]
+    #selectedComponents = [TTJets, DoubleEG_Run2016B_PromptReco_v2]
+    selectedComponents = [VVTo2L2Nu]
     #selectedComponents = [QCD_Pt_15to3000_M2_0_500, QCD_Pt_15to3000_M2_5_100]
     for comp in selectedComponents:
-            comp.files = comp.files[:5]
-            comp.splitFactor = 1
+            #comp.files = comp.files[:5]
+            comp.splitFactor = 10
 
 from CMGTools.TTHAnalysis.tools.EOSEventsWithDownload import EOSEventsWithDownload
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events

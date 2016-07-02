@@ -16,6 +16,7 @@ triggers_1el22 = ["HLT_Ele22_eta2p1_WPLoose_Gsf_v*","HLT_Ele22_eta2p1_WPTight_Gs
 trigger_1mu_noiso_r = ['HLT_Mu45_eta2p1_v*']
 trigger_1mu_noiso_w = ['HLT_Mu50_v*']
 trigger_1el_noiso = ['HLT_Ele105_CaloIdVT_GsfTrkIdT_v*']
+#trigger_1el = ['HLT_Ele25_eta2p1_WPTight_Gsf_v*']
 
 ## muons
 triggers_mu_ht600 = ["HLT_Mu15_IsoVVVL_PFHT600_v*"]
