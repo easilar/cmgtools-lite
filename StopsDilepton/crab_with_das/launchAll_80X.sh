@@ -1,12 +1,21 @@
 #!/bin/sh
-python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" DoubleEG_Run2016B_PromptReco_v2
-python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" MuonEG_Run2016B_PromptReco_v2
-python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" DoubleMuon_Run2016B_PromptReco_v2
+#python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" DoubleEG_Run2016B_PromptReco_v2
+#python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" MuonEG_Run2016B_PromptReco_v2
+#python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" DoubleMuon_Run2016B_PromptReco_v2
+#
+#python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" MET_Run2016B_PromptReco_v2
+#python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" JetHT_Run2016B_PromptReco_v2
+#python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SingleMuon_Run2016B_PromptReco_v2
+#python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SingleElectron_Run2016B_PromptReco_v2
 
-python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" MET_Run2016B_PromptReco_v2
-python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" JetHT_Run2016B_PromptReco_v2
-python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SingleMuon_Run2016B_PromptReco_v2
-python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SingleElectron_Run2016B_PromptReco_v2
+
+python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SMS_T2tt_mStop_150to250
+python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SMS_T2tt_mStop_250to350
+python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SMS_T2tt_mStop_350to400
+python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SMS_T2tt_mStop_400to1200
+python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SMS_T2tt_mStop_425_mLSP_325
+python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SMS_T2tt_mStop_500_mLSP_325
+python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" SMS_T2tt_mStop_850_mLSP_100
 
 #python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" TTJets
 #python launch.py --remoteDir="80X_1l_2" --unitsPerJob=5 --production_label="80X_1l_2" TT_pow_ext3
