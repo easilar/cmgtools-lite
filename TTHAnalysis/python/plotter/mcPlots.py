@@ -10,7 +10,7 @@ if "/fakeRate_cc.so" not in ROOT.gSystem.GetLibraries():
 
 SAFE_COLOR_LIST=[
 ROOT.kBlack, ROOT.kRed, ROOT.kGreen+2, ROOT.kBlue, ROOT.kMagenta+1, ROOT.kOrange+7, ROOT.kCyan+1, ROOT.kGray+2, ROOT.kViolet+5, ROOT.kSpring+5, ROOT.kAzure+1, ROOT.kPink+7, ROOT.kOrange+3, ROOT.kBlue+3, ROOT.kMagenta+3, ROOT.kRed+2,
-]
+]+range(11,40)
 def _unTLatex(string):
     return string.replace("#chi","x").replace("#mu","m").replace("#rightarrow","->")
 class PlotFile:
@@ -121,7 +121,7 @@ def doSpam(text,x1,y1,x2,y2,align=12,fill=False,textSize=0.033,_noDelete={}):
     cmsprel.SetLineColor(0);
     cmsprel.SetTextAlign(align);
     cmsprel.SetTextFont(42);
-    cmsprel.AddText(text);
+    for line in text.split("\\n"): cmsprel.AddText(line);
     cmsprel.Draw("same");
     _noDelete[text] = cmsprel; ## so it doesn't get deleted by PyROOT
     return cmsprel
@@ -143,6 +143,14 @@ def doTinyCmsPrelim(textLeft="_default_",textRight="_default_",hasExpo=False,tex
         doSpam(textLeft, (.28 if hasExpo else .17)+xoffs, .955, .60+xoffs, .995, align=12, textSize=textSize)
     if textRight not in ['', None]:
         doSpam(textRight,.68+xoffs, .955, .99+xoffs, .995, align=32, textSize=textSize)
+
+def printExtraLabel(labeltext, legPosition):
+    nLines = len(labeltext.split("\\n"))
+
+    if legPosition  == "TR":
+        doSpam(labeltext, .30, .90-nLines*0.03, .48, .90, align=11, textSize=0.03)
+    elif legPosition == "TL":
+        doSpam(labeltext, .75, .90-nLines*0.03, .93, .90, align=11, textSize=0.03)
 
 def reMax(hist,hist2,islog,factorLin=1.3,factorLog=2.0):
     if  hist.ClassName() == 'THStack':
@@ -260,6 +268,21 @@ def doScaleSigNormData(pspec,pmap,mca):
         if p in signals: h.Scale(sf)
     pspec.setLog("ScaleSig", [ "Signal processes scaled by %g" % sf ] )
     return sf
+
+def doScaleBkgNormData(pspec,pmap,mca,list = []):
+    if "data"       not in pmap: return -1.0
+    if "background" not in pmap: return -1.0
+    if any([l not in pmap for l in list]): return -1.0
+    data = pmap["data"]
+    bkg  = pmap["background"]
+    int = sum([pmap[l].Integral() for l in list])
+    rm = bkg.Integral() - int
+    sf = (data.Integral() - rm) / int
+    bkgs = ["background"] + list
+    for p,h in pmap.iteritems():
+        if p in bkgs: h.Scale(sf)
+    return sf
+
 
 def doNormFit(pspec,pmap,mca,saveScales=False):
     if "data" not in pmap: return -1.0
@@ -539,11 +562,17 @@ def doLegend(pmap,mca,corner="TR",textSize=0.035,cutoff=1e-2,cutoffSignals=True,
         (x1,y1,x2,y2) = (.90-legWidth, .75 - textSize*max(nentries-3,0), .90, .93)
         if corner == "TR":
             (x1,y1,x2,y2) = (.90-legWidth, .75 - textSize*max(nentries-3,0), .90, .93)
-        elif corner == "BR":
-            (x1,y1,x2,y2) = (.90-legWidth, .33 + textSize*max(nentries-3,0), .90, .15)
+        elif corner == "TC":
+            (x1,y1,x2,y2) = (.5, .75 - textSize*max(nentries-3,0), .5+legWidth, .93)
         elif corner == "TL":
             (x1,y1,x2,y2) = (.2, .75 - textSize*max(nentries-3,0), .2+legWidth, .93)
-        
+        elif corner == "BR":
+            (x1,y1,x2,y2) = (.90-legWidth, .33 + textSize*max(nentries-3,0), .90, .15)
+        elif corner == "BC":
+            (x1,y1,x2,y2) = (.5, .33 + textSize*max(nentries-3,0), .5+legWidth, .15)
+        elif corner == "BL":
+            (x1,y1,x2,y2) = (.2, .33 + textSize*max(nentries-3,0), .2+legWidth, .15)
+       
         leg = ROOT.TLegend(x1,y1,x2,y2)
         leg.SetFillColor(0)
         leg.SetShadowColor(0)
@@ -558,7 +587,7 @@ def doLegend(pmap,mca,corner="TR",textSize=0.035,cutoff=1e-2,cutoffSignals=True,
         for (plot,label,style) in  bgEntries: leg.AddEntry(plot,label,style)
         leg.Draw()
         ## assign it to a global variable so it's not deleted
-        global legend_;
+        global legend_
         legend_ = leg 
         return leg
 
@@ -580,8 +609,10 @@ class PlotMaker:
             for i,(cn,cv) in enumerate(allcuts[:-1]): # skip the last one which is equal to all cuts
                 cnsafe = "cut_%02d_%s" % (i, re.sub("[^a-zA-Z0-9_.]","",cn.replace(" ","_")))
                 sets.append((cnsafe,cn,cv))
+        elist = (self._options.elist == True) or (self._options.elist == 'auto' and len(plots.plots()) > 2)
         for subname, title, cut in sets:
             print "cut set: ",title
+            if elist: mca.applyCut(cut)
             dir = self._dir
             if subname:
                 if self._dir.Get(subname):
@@ -648,10 +679,27 @@ class PlotMaker:
                         dir.WriteTObject(v)
                     continue
                 #
-                if options.scaleSignalToData: doScaleSigNormData(pspec,pmap,mca)
+                stack = ROOT.THStack(pspec.name+"_stack",pspec.name)
+                hists = [v for k,v in pmap.iteritems() if k != 'data']
+                total = hists[0].Clone(pspec.name+"_total"); total.Reset()
+                totalSyst = hists[0].Clone(pspec.name+"_totalSyst"); totalSyst.Reset()
+                if self._options.plotmode == "norm": 
+                    if 'data' in pmap:
+                        total.GetYaxis().SetTitle(total.GetYaxis().GetTitle()+" (normalized)")
+                    else:
+                        total.GetYaxis().SetTitle("density/bin")
+                    total.GetYaxis().SetDecimals(True)
+                if options.scaleSignalToData: self._sf = doScaleSigNormData(pspec,pmap,mca)
+                if options.scaleBackgroundToData != []: self._sf = doScaleBkgNormData(pspec,pmap,mca,options.scaleBackgroundToData)
                 elif options.fitData: doNormFit(pspec,pmap,mca)
                 elif options.preFitData and pspec.name == options.preFitData: 
                     doNormFit(pspec,pmap,mca,saveScales=True)
+                binlabels = pspec.getOption("xBinLabels","")
+                if binlabels != "" and len(binlabels.split(",")) == total.GetNbinsX():
+                    blist = binlabels.split(",")
+                    for i in range(1,total.GetNbinsX()+1): 
+                        total.GetXaxis().SetBinLabel(i,blist[i-1]) 
+                        total.GetYaxis().SetLabelSize(0.05)
                 #
                 for k,v in pmap.iteritems():
                     if v.InheritsFrom("TH1"): v.SetDirectory(dir) 
@@ -662,6 +710,8 @@ class PlotMaker:
                                   makeCanvas=makeCanvas,
                                   outputDir=dir,
                                   printDir=self._options.printDir+(("/"+subname) if subname else ""))
+
+            if elist: mca.clearCut()
 
     def printOnePlot(self,mca,pspec,pmap,makeCanvas=True,outputDir=None,printDir=None,xblind=[9e99,-9e99],extraProcesses=[],plotmode="auto",outputName=None):
                 options = self._options
@@ -724,8 +774,8 @@ class PlotMaker:
                             plot.SetMarkerStyle(0)
 
 
-                if stack.GetNhists() == 0:
-                    print "ERROR: for %s, all histograms are empty\n " % outputName
+                if not self._options.emptyStack and stack.GetNhists() == 0:
+                    print "ERROR: for %s, all histograms are empty\n " % pspec.name
                     return
 
                 # define aspect ratio
@@ -805,6 +855,8 @@ class PlotMaker:
                         doStatTests(totalSyst, pmap['data'], options.doStatTests, legendCorner=pspec.getOption('Legend','TR'))
                 if pspec.hasOption('YMin') and pspec.hasOption('YMax'):
                     total.GetYaxis().SetRangeUser(pspec.getOption('YMin',1.0), pspec.getOption('YMax',1.0))
+                if options.yrange: 
+                    total.GetYaxis().SetRangeUser(options.yrange[0], options.yrange[1])
                 legendCutoff = pspec.getOption('LegendCutoff', 1e-5 if c1.GetLogy() else 1e-2)
                 if plotmode == "norm": legendCutoff = 0 
                 doLegend(pmap,mca,corner=pspec.getOption('Legend','TR'),
@@ -934,6 +986,8 @@ def addPlotMakerOptions(parser, addAlsoMCAnalysis=True):
     parser.add_option("--noErrorBandOnRatio", dest="errorBandOnRatio", action="store_false", default=True, help="Do not show the error band on the reference in the ratio plots")
     parser.add_option("--fitRatio", dest="fitRatio", type="int", default=None, help="Fit the ratio with a polynomial of the specified order")
     parser.add_option("--scaleSigToData", dest="scaleSignalToData", action="store_true", default=False, help="Scale all signal processes so that the overall event yield matches the observed one")
+    parser.add_option("--scaleBkgToData", dest="scaleBackgroundToData", action="append", default=[], help="Scale all background processes so that the overall event yield matches the observed one")
+    parser.add_option("--showSF", dest="showSF", action="store_true", default=False, help="Show scale factor extracted from either --scaleSigToData or --scaleBkgToData on the plot")
     parser.add_option("--fitData", dest="fitData", action="store_true", default=False, help="Perform a fit to the data")
     parser.add_option("--preFitData", dest="preFitData", type="string", default=None, help="Perform a pre-fit to the data using the specified distribution, then plot the rest")
     parser.add_option("--maxRatioRange", dest="maxRatioRange", type="float", nargs=2, default=(0.0, 5.0), help="Min and max for the ratio")
@@ -953,6 +1007,10 @@ def addPlotMakerOptions(parser, addAlsoMCAnalysis=True):
     parser.add_option("--toleranceForDiff", dest="toleranceForDiff", default=0.0, type="float", help="set numerical tollerance to define when two histogram bins are considered different");
     parser.add_option("--pseudoData", dest="pseudoData", type="string", default=None, help="If set to 'background' or 'all', it will plot also a pseudo-dataset made from background (or signal+background) with Poisson fluctuations in each bin.")
     parser.add_option("--wide", dest="wideplot", action="store_true", default=False, help="Draw a wide canvas")
+    parser.add_option("--elist", dest="elist", action="store_true", default='auto', help="Use elist (on by default if making more than 2 plots)")
+    parser.add_option("--no-elist", dest="elist", action="store_false", default='auto', help="Don't elist (which are on by default if making more than 2 plots)")
+    parser.add_option("--yrange", dest="yrange", default=None, nargs=2, type='float', help="Y axis range");
+    parser.add_option("--emptyStack", dest="emptyStack", action="store_true", default=False, help="Allow empty stack in order to plot, for example, only signals but no backgrounds.")
 
 if __name__ == "__main__":
     from optparse import OptionParser
