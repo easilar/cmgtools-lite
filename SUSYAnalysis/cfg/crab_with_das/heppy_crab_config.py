@@ -33,6 +33,7 @@ for l in p.stdout.readlines():
       user = fields[-1]
 
 config.Data.outLFNDirBase = '/store/user/' + user+'/cmgTuples/'
+#config.Data.outLFNDirBase = '/store/cmst3/group/susy/easilar/cmgTuples/'
 remoteDir = os.environ["CMG_REMOTE_DIR"]
 if remoteDir!='':
   config.Data.outLFNDirBase+=remoteDir.rstrip('/')+'/'
@@ -46,5 +47,6 @@ config.Data.unitsPerJob = 10
 config.section_("Site")
 config.Site.blacklist = ['T2_US_Purdue', 'T2_US_Nebraska', 'T2_US_MIT', 'T2_US_Caltech']
 config.Site.storageSite = 'T2_AT_Vienna'
+#config.Site.storageSite = 'T2_CH_CERN'
 config.Data.ignoreLocality = False
 

@@ -199,10 +199,10 @@ isoTrackAna.setOff=False
 genAna.allGenTaus = True
 
 #-------- HOW TO RUN
-isData = True # default, but will be overwritten below
+isData = False # default, but will be overwritten below
 
-#sample = 'MC'
-sample = 'data'
+sample = 'MC'
+#sample = 'data'
 #sample = 'Signal'
 test = 0
 
@@ -427,7 +427,7 @@ if isSignal:
 sequence = cfg.Sequence(susyCoreSequence+[
 		LHEAna,
 		ttHEventAna,
-#		ttHSTSkimmer,
+		ttHSTSkimmer,
 		ttHHTSkimmer,
 		hbheFilterAna,
 		treeProducer,
@@ -437,7 +437,7 @@ sequence = cfg.Sequence(susyCoreSequence+[
 # remove skimming for Data or Signal
 if isData:# or isSignal :
 	sequence.remove(ttHHTSkimmer)
-#	sequence.remove(ttHSTSkimmer)
+	sequence.remove(ttHSTSkimmer)
 
 if isSignal:
 #	sequence.remove(ttHHTSkimmer)
