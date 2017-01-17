@@ -5,6 +5,9 @@ susyCore_globalVariables = [
             NTupleVariable("rhoCN",  lambda ev: ev.rhoCN, float, help="fixed grid rho central neutral"),
             NTupleVariable("nVert",  lambda ev: len(ev.goodVertices), int, help="Number of good vertices"), 
 
+            NTupleVariable("Flag_badChargedHadronSummer2016",  lambda ev: ev.badChargedHadronSummer2016, int, help="badChargedHadron filter result"), 
+            NTupleVariable("Flag_badMuonSummer2016",  lambda ev: ev.badMuonSummer2016, int, help="badMuon filter result"),
+
 #            NTupleVariable("nJet25", lambda ev: len(ev.cleanJets), int, help="Number of jets with pt > 25"),
 #            NTupleVariable("nBJetLoose25", lambda ev: len(ev.bjetsLoose), int, help="Number of jets with pt > 25 passing CSV loose"),
 #            NTupleVariable("nBJetMedium25", lambda ev: len(ev.bjetsMedium), int, help="Number of jets with pt > 25 passing CSV medium"),
