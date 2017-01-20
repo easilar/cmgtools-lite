@@ -372,7 +372,6 @@ jetAna = cfg.Analyzer(
     cleanJetsFromFirstPhoton = False,
     cleanJetsFromTaus = False,
     cleanJetsFromIsoTracks = False,
-    cleanJetsFromLeptons = True,
     doQG = False,
     do_mc_match = True,
     collectionPostFix = "",
