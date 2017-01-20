@@ -33,8 +33,8 @@ metAna.recalibrate = True
 
 
 #-------- HOW TO RUN
-sample = 'MC'
-#sample = 'data' #default
+#sample = 'MC'
+sample = 'data' #default
 #sample = 'Signal'
 
 multib = False
@@ -51,7 +51,7 @@ elif sample == "Signal":
   isSignal = True
 
 #Set this depending on the running mode 
-test = 1 
+test = 0 
 #0: PRODUCTION (for batch)
 #1: Usually for TESTING (single component with single thread)
 #2: test all components (1 thread per comp) 
@@ -338,21 +338,22 @@ elif sample == "data":
   # central samples
   from CMGTools.RootTools.samples.samples_13TeV_Moriond2017 import *
   #selectedComponents = [JetHT_Run2016B_23Sep2016, HTMHT_Run2016B_23Sep2016, MET_Run2016B_23Sep2016, SingleElectron_Run2016B_23Sep2016, SingleMuon_Run2016B_23Sep2016, SinglePhoton_Run2016B_23Sep2016, DoubleEG_Run2016B_23Sep2016, MuonEG_Run2016B_23Sep2016, DoubleMuon_Run2016B_23Sep2016, Tau_Run2016B_23Sep2016]
-  selectedComponents = [SingleElectron_Run2016H_PromptReco_v2]
-  #selectedComponents = [
-  #                      SingleElectron_Run2016B_23Sep2016,\
-  #                      SingleElectron_Run2016C_23Sep2016_v1,\
-  #                      SingleElectron_Run2016D_23Sep2016_v1,\
-  #                      SingleElectron_Run2016E_23Sep2016_v1,\
-  #                      SingleElectron_Run2016F_23Sep2016_v1,\
-  #                      SingleElectron_Run2016G_23Sep2016_v1,\
-  #                      ]
+  #selectedComponents = [SingleElectron_Run2016H_PromptReco_v2]
+  selectedComponents = [
+                        SingleMuon_Run2016B_23Sep2016,\
+                        SingleMuon_Run2016C_23Sep2016_v1,\
+                        SingleMuon_Run2016D_23Sep2016_v1,\
+                        SingleMuon_Run2016E_23Sep2016_v1,\
+                        SingleMuon_Run2016F_23Sep2016_v1,\
+                        SingleMuon_Run2016G_23Sep2016_v1,\
+                        SingleMuon_Run2016H_PromptReco_v2
+                        ]
 
   
   if test!=0 and jsonAna in susyCoreSequence: susyCoreSequence.remove(jsonAna)
   if test==1:
     # test one component (2 thread)
-    comp = MET_Run2016G_23Sep2016_v1#SingleElectron_Run2016B_23Sep2016
+    comp = SingleMuon_Run2016B_23Sep2016 #SingleElectron_Run2016B_23Sep2016
 #    comp.files = comp.files[:1]
     comp.files = comp.files[10:11]
     selectedComponents = [comp]
