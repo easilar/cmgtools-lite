@@ -69,7 +69,7 @@ eventFlagsAna = cfg.Analyzer(
         "HBHENoiseFilter" : [ "Flag_HBHENoiseFilter" ],
         "HBHENoiseIsoFilter" : [ "Flag_HBHENoiseIsoFilter" ],
         "globalTightHalo2016Filter" : [ "Flag_globalTightHalo2016Filter" ],
-        "badGlobalMuonTaggersMiniAOD" : [ "Flag_badGlobalMuonTaggersMiniAOD" ],
+        #"badGlobalMuonTaggersMiniAOD" : [ "Flag_badGlobalMuonTaggersMiniAOD" ],
         "CSCTightHalo2015Filter" : [ "Flag_CSCTightHalo2015Filter" ],
         "CSCTightHaloFilter" : [ "Flag_CSCTightHaloFilter" ],
         "CSCTightHalo2016Filter" : [ "Flag_globalTightHalo2016Filter" ],
