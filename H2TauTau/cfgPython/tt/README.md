@@ -32,3 +32,10 @@ Check the results:
 cat Trash/sync/CMGTools.H2TauTau.heppy.analyzers.colin.Printer.Printer_1/Counter.txt
 ```
 
+You should see: 
+
+```
+Counter Counter :
+         All Events                                  172768      1.00    1.0000
+         >= 2 jets                                   169172      0.98    0.9792
+```
