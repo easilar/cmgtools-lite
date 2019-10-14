@@ -1,11 +1,20 @@
 # Reading Nano AOD
 
+## Installation
+
 Follow [The usual instructions](https://github.com/GaelTouquet/cmgtools-lite/tree/htt_9_4_11_cand1_v1/H2TauTau#installation-recipe). 
 
-Update to these branches: 
+[Add the nano AOD tools](https://github.com/cms-nanoAOD/nanoAOD-tools) in the `PhysicsTools` subsystem.
+We will use them as an interface to the object collections in the event.
 
-* CMGTools : cbernet/nano_aod
+Merge these branches:
+
 * CMSSW : cbernet/nano_aod
+* CMGTools : cbernet/nano_aod
+
+Recompile. 
+
+## Running
 
 Get a test file: 
 
