@@ -45,6 +45,19 @@ jet_reader = cfg.Analyzer(
    src_class = Jet
 )
 
+from CMGTools.H2TauTau.heppy.objects.tau import Tau
+tau_reader = cfg.Analyzer(
+    Reader, 
+   collection_name = 'Tau',
+   output = 'taus',
+   src_class = Tau
+)
+
+#TODO 
+#Select two taus among 
+#Write the Taus you selected to the ntuple
+
+
 #skim_func = lambda x: True
 #
 #from CMGTools.H2TauTau.heppy.analyzers.NtupleProducer import NtupleProducer
@@ -62,6 +75,7 @@ jet_reader = cfg.Analyzer(
 sequence = cfg.Sequence(
 [
 jet_reader,
+tau_reader,
 printer,
 #ntuple
 ]
@@ -74,5 +88,6 @@ config = cfg.Config(components=selectedComponents,
                     services=[],
                     events_class=Events
                     )
+#import pdb;pdb.set_trace()
 print(config)
 
