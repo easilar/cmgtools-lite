@@ -21,8 +21,8 @@ class Printer(Analyzer):
         jets = Collection(event.input, 'Jet')
         taus = Collection(event.input, 'Tau')
         jet = Jet(jets[0])
-        jet.bar()
-        jet.pt()
+        #jet.bar()
+        #jet.pt()
         njets = 0
         for i,jet in enumerate(jets): 
             if jet.pt<50: 

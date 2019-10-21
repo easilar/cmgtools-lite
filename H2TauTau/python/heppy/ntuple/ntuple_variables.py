@@ -322,3 +322,18 @@ tautau.append(to_leg('l1_specific', tau_vars, 'l1',
                     lambda x: x.dileptons_sorted[0].leg1()))
 tautau.append(to_leg('l2_specific', tau_vars, 'l2',
                     lambda x: x.dileptons_sorted[0].leg2()))
+
+nano_tautau = EventContent(
+    [event,
+     dilepton_vars,
+     to_leg('l1_generic', lepton_vars, 'l1',
+            lambda x: x.dileptons_sorted[0].leg1()),
+     to_leg('l2_generic', lepton_vars, 'l2',
+            lambda x: x.dileptons_sorted[0].leg2()),
+     to_leg('l1_specific', tau_vars, 'l1',
+                    lambda x: x.dileptons_sorted[0].leg1()),
+     to_leg('l2_specific', tau_vars, 'l2',
+                    lambda x: x.dileptons_sorted[0].leg2())
+     ]
+)
+

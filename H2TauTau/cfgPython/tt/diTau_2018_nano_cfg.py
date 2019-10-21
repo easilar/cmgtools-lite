@@ -36,17 +36,35 @@ printer = cfg.Analyzer(
 )
 
 
+from CMGTools.H2TauTau.heppy.analyzers.ece.Reader import Reader
+from CMGTools.H2TauTau.heppy.objects.jet import Jet
+jet_reader = cfg.Analyzer(
+    Reader, 
+   collection_name = 'Jet',
+   output = 'jets',
+   src_class = Jet
+)
 
-# from CMGTools.H2TauTau.heppy.analyzers.colin.Reader import Reader
-# from CMGTools.H2TauTau.heppy.objects.jet import Jet
-# jet_reader = cfg.Analyzer(
-#     Reader, 
-#    collection_name = 'Jet',
-#    class_object = Jet,
+#skim_func = lambda x: True
+#
+#from CMGTools.H2TauTau.heppy.analyzers.NtupleProducer import NtupleProducer
+#from CMGTools.H2TauTau.heppy.ntuple.ntuple_variables import  nano_tautau as event_content_nanotautau
+#
+#ntuple = cfg.Analyzer(
+#    NtupleProducer,
+#    name = 'NtupleProducer',
+#    treename = 'events',
+#    event_content = event_content_nanotautau,
+#    skim_func = skim_func
 #)
 
+
 sequence = cfg.Sequence(
-[printer]
+[
+jet_reader,
+printer,
+#ntuple
+]
 )
 
 from PhysicsTools.HeppyCore.framework.chain import Chain as Events
