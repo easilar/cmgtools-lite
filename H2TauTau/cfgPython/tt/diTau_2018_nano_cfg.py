@@ -11,7 +11,7 @@ from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 import logging
 logging.shutdown()
 # reload(logging)
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
 from PhysicsTools.HeppyCore.framework.event import Event
 Event.print_patterns = ['*taus*', '*muons*', '*electrons*', 'veto_*', 
@@ -34,6 +34,16 @@ from CMGTools.H2TauTau.heppy.analyzers.colin.Printer import Printer
 printer = cfg.Analyzer(
     Printer
 )
+
+
+
+# from CMGTools.H2TauTau.heppy.analyzers.colin.Reader import Reader
+# from CMGTools.H2TauTau.heppy.objects.jet import Jet
+# jet_reader = cfg.Analyzer(
+#     Reader, 
+#    collection_name = 'Jet',
+#    class_object = Jet,
+#)
 
 sequence = cfg.Sequence(
 [printer]
