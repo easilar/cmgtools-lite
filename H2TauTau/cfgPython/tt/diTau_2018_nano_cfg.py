@@ -53,6 +53,21 @@ tau_reader = cfg.Analyzer(
    src_class = Tau
 )
 
+from CMGTools.H2TauTau.heppy.analyzers.Selector import Selector
+def select_tau(tau):
+    #print("tau before selection: ", tau.pt()  )
+    return tau.pt()    > 40  and \
+        abs(tau.eta()) < 2.1
+
+sel_taus = cfg.Analyzer(
+    Selector,
+    'sel_taus',
+    output = 'sel_taus',
+    src = 'taus',
+    filter_func = select_tau  
+)
+
+
 #TODO 
 #Select two taus among 
 #Write the Taus you selected to the ntuple
@@ -76,6 +91,7 @@ sequence = cfg.Sequence(
 [
 jet_reader,
 tau_reader,
+sel_taus,
 printer,
 #ntuple
 ]

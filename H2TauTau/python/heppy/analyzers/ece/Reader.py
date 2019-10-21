@@ -9,10 +9,8 @@ class Reader(Analyzer):
 
 	def process(self, event):
 		collection = Collection(event.input, self.cfg_ana.collection_name) 
-		if len(collection) > 0 :
-			test_obj = self.cfg_ana.src_class(collection[0])
-			print('collection name:' , self.cfg_ana.collection_name)
-			print('leading obj pt:' , test_obj.pt())
-		else:
-			print("size of the collection is 0")
-		setattr(event, self.cfg_ana.output, collection)
+		objects = []
+		for tmp_obj in collection:
+			curr_obj = self.cfg_ana.src_class(tmp_obj)
+			objects.append(curr_obj)
+		setattr(event, self.cfg_ana.output, objects)
