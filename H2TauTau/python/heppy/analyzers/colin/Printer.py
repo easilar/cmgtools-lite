@@ -20,7 +20,7 @@ class Printer(Analyzer):
         self.count.inc('All Events')
         jets = Collection(event.input, 'Jet')
         taus = Collection(event.input, 'Tau')
-        jet = Jet(jets[0])
+        #jet = Jet(jets[0])
         #jet.bar()
         #jet.pt()
         njets = 0
