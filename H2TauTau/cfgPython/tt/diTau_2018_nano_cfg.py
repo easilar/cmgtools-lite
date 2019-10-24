@@ -13,9 +13,9 @@ logging.shutdown()
 # reload(logging)
 logging.basicConfig(level=logging.INFO)
 
-#from PhysicsTools.HeppyCore.framework.event import Event
-#Event.print_patterns = ['*taus*', '*muons*', '*electrons*', 'veto_*', 
-#                        '*dileptons_*', '*jets*']
+from PhysicsTools.HeppyCore.framework.event import Event
+Event.print_patterns = ['*taus*', '*muons*', '*electrons*', 'veto_*', 
+                        '*dileptons_*', '*jets*']
 
 
 ###############
@@ -71,25 +71,46 @@ sel_taus = cfg.Analyzer(
 
 from CMGTools.H2TauTau.heppy.analyzers.EventFilter import EventFilter
 
-#This is to require an event with at least 1 tau in it.
-one_tau = cfg.Analyzer(
+#This is to require an event with at least 2 tau in it.
+two_tau = cfg.Analyzer(
     EventFilter,
     'two_tau',
     src = 'sel_taus',
-    filter_func = lambda x : len(x)>0
+    filter_func = lambda x : len(x)>1
+)
+
+
+from CMGTools.H2TauTau.heppy.ntuple.tools import Block , EventContent , Variable
+v = Variable
+
+
+
+nano_tau_vars = Block(
+    'tau', lambda x: x.sel_taus[0],
+    pt = v(lambda x: x.pt()),
+    eta = v(lambda x: x.eta()),
+    phi = v(lambda x: x.phi()),
+    m = v(lambda x: x.mass()),
+    q = v(lambda x: x.charge()),
+    )
+
+
+nano_tautau = EventContent(
+    [
+    nano_tau_vars
+     ]
 )
 
 
 skim_func = lambda x: True
 
 from CMGTools.H2TauTau.heppy.analyzers.NtupleProducer import NtupleProducer
-from CMGTools.H2TauTau.heppy.ntuple.ntuple_variables import  nano_tautau as event_content_nanotautau
 
 ntuple = cfg.Analyzer(
     NtupleProducer,
     name = 'NtupleProducer',
     treename = 'events',
-    event_content = event_content_nanotautau,
+    event_content = nano_tautau,
     skim_func = skim_func
 )
 
@@ -99,7 +120,7 @@ sequence = cfg.Sequence(
 jet_reader,
 tau_reader,
 sel_taus,
-one_tau,
+two_tau,
 printer,
 ntuple
 ]

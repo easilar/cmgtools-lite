@@ -13,5 +13,4 @@ class Reader(Analyzer):
 		for tmp_obj in collection:
 			curr_obj = self.cfg_ana.src_class(tmp_obj)
 			objects.append(curr_obj)
-		#import pdb;pdb.set_trace()
 		setattr(event, self.cfg_ana.output, objects)
