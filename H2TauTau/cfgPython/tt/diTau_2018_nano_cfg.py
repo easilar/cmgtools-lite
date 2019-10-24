@@ -53,13 +53,24 @@ tau_reader = cfg.Analyzer(
    src_class = Tau
 )
 
+###############
+# Analyzers 
+###############
+
 from CMGTools.H2TauTau.heppy.analyzers.Selector import Selector
 
 #This is to select the taus with a certain requirement.
 def select_tau(tau):
-    print("tau before selection: ", tau.pt()  )
+    #print("tau before selection: ", tau.pt()  )
+    #print("compare dz", tau.leadChargedHadrCand().dz() , tau.dz()  )
+    #print("tau decayModeFinding",  tau.tauID('decayModeFinding')  )
+    #print("tau byVVLooseIsolationMVArun2017v2DBoldDMwLT2017",  tau.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')  )
     return tau.pt()    > 40  and \
-        abs(tau.eta()) < 2.1
+        abs(tau.eta()) < 2.1 and \
+        abs(tau.leadChargedHadrCand().dz()) < 0.2 and \
+        tau.tauID('decayModeFinding') > 0.5 and \
+        abs(tau.charge()) == 1. and \
+        tau.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')
 
 sel_taus = cfg.Analyzer(
     Selector,
@@ -79,25 +90,71 @@ two_tau = cfg.Analyzer(
     filter_func = lambda x : len(x)>1
 )
 
+# ditau pair ================================================================
 
-from CMGTools.H2TauTau.heppy.ntuple.tools import Block , EventContent , Variable
+from CMGTools.H2TauTau.heppy.analyzers.DiLeptonAnalyzer import DiLeptonAnalyzer
+
+dilepton = cfg.Analyzer(
+    DiLeptonAnalyzer,
+    output = 'dileptons',
+    l1 = 'sel_taus',
+    l2 = 'sel_taus',
+    dr_min = 0.5
+)
+
+def sorting_metric(dilepton):
+    leg1_iso = dilepton.leg1().tauID('byIsolationMVArun2017v2DBoldDMwLTraw2017')
+    leg2_iso = dilepton.leg2().tauID('byIsolationMVArun2017v2DBoldDMwLTraw2017')
+    print("I am in the sorting metric")
+    if leg1_iso > leg2_iso:
+        most_isolated_tau_isolation = leg1_iso
+        most_isolated_tau_pt = dilepton.leg1().pt()
+        least_isolated_tau_isolation = leg2_iso
+        least_isolated_tau_pt = dilepton.leg2().pt()
+    else:
+        most_isolated_tau_isolation = leg2_iso
+        most_isolated_tau_pt = dilepton.leg2().pt()
+        least_isolated_tau_isolation = leg1_iso
+        least_isolated_tau_pt = dilepton.leg1().pt()
+    return (-most_isolated_tau_isolation, -most_isolated_tau_pt,-least_isolated_tau_isolation,-least_isolated_tau_pt)
+
+from CMGTools.H2TauTau.heppy.analyzers.Sorter import Sorter
+dilepton_sorted = cfg.Analyzer(
+    Sorter,
+    output = 'dileptons_sorted',
+    src = 'dileptons',
+    metric = sorting_metric,
+    reverse = False
+    )
+
+sequence_dilepton = cfg.Sequence([
+        sel_taus,
+        two_tau,
+        dilepton,
+        dilepton_sorted,
+        ])
+
+
+
+from CMGTools.H2TauTau.heppy.ntuple.tools import Block , EventContent , Variable , to_leg
 v = Variable
 
 
-
 nano_tau_vars = Block(
-    'tau', lambda x: x.sel_taus[0],
-    pt = v(lambda x: x.pt()),
-    eta = v(lambda x: x.eta()),
-    phi = v(lambda x: x.phi()),
-    m = v(lambda x: x.mass()),
-    q = v(lambda x: x.charge()),
-    )
-
+    	'tau', lambda x: x.sel_taus[0],
+	tau_pt = v(lambda x: x.pt()),
+	tau_eta = v(lambda x: x.eta()),
+	tau_phi = v(lambda x: x.phi()),
+	tau_m = v(lambda x: x.mass()),
+	tau_q = v(lambda x: x.charge()),
+	tau_dz =  v(lambda x: x.dz()),
+	tau_idDecayMode = v(lambda x: x.idDecayMode()),
+	tau_idMVAoldDM2017v2 = v(lambda x: x.idMVAoldDM2017v2())
+    	)
 
 nano_tautau = EventContent(
     [
-    nano_tau_vars
+    nano_tau_vars,
      ]
 )
 
@@ -119,12 +176,11 @@ sequence = cfg.Sequence(
 [
 jet_reader,
 tau_reader,
-sel_taus,
-two_tau,
-printer,
-ntuple
 ]
 )
+sequence.extend( sequence_dilepton )
+sequence.append(printer)
+sequence.append(ntuple)
 
 from PhysicsTools.HeppyCore.framework.chain import Chain as Events
 Events.tree_name = 'Events'
