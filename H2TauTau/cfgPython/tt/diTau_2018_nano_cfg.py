@@ -4,6 +4,7 @@ import re
 import ROOT
 
 import PhysicsTools.HeppyCore.framework.config as cfg
+
 from PhysicsTools.HeppyCore.framework.config import printComps
 from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 
@@ -135,6 +136,27 @@ sequence_dilepton = cfg.Sequence([
         ])
 
 
+# weights ================================================================
+
+# id weights
+from CMGTools.H2TauTau.heppy.analyzers.TauIDWeighter import TauIDWeighter
+tauidweighter_general = cfg.Analyzer(
+    TauIDWeighter,
+    'TauIDWeighter_general',
+    taus = lambda event: [event.dileptons_sorted[0].leg1(),event.dileptons_sorted[0].leg2()]
+)
+
+tauidweighter = cfg.Analyzer(
+    TauIDWeighter,
+    'TauIDWeighter',
+    taus = lambda event: [event.dileptons_sorted[0].leg1(),event.dileptons_sorted[0].leg2()],
+    WPs = {'JetToTau':'Tight', # dummy, no weights for jet fakes
+           'TauID':'Tight',
+           'MuToTaufake':'Loose',
+           'EToTaufake':'VLoose'}
+)
+
+
 
 from CMGTools.H2TauTau.heppy.ntuple.tools import Block , EventContent , Variable , to_leg
 v = Variable
@@ -179,6 +201,8 @@ tau_reader,
 ]
 )
 sequence.extend( sequence_dilepton )
+#sequence.append(tauidweighter_general)
+#sequence.append(tauidweighter)
 sequence.append(printer)
 sequence.append(ntuple)
 

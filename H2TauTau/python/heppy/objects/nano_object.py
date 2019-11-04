@@ -13,7 +13,7 @@ class NanoObject(object):
                     return getattr(self.nano_obj, attr)
                 return get_value
             else:
-                print('not implemented')
+                print('not implemented',attr)
                 self.__class__.not_implemented.add(attr)
                 return self.dummy_value
 

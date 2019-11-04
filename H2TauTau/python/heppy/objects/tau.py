@@ -11,19 +11,18 @@ class Tau(NanoObject):
 		tauID_dict = {
 		"decayModeFinding":self.idDecayMode(),
 		"decayModeFindingNewDMs":self.idDecayModeNewDMs(),
-		"byVVLooseIsolationMVArun2017v2DBoldDMwLT2017":self.idMVAoldDM2017v2()==0, #FIXME
+		"byVVLooseIsolationMVArun2017v2DBoldDMwLT2017":self.idMVAoldDM2017v2()==0, # VVLoose: 2^0=1  
 		"byIsolationMVArun2017v2DBoldDMwLTraw2017":self.rawMVAoldDM2017v2()
 		}
 		return tauID_dict[mode]
 
 	def pdgId(self):
-		return 15*self.charge() #FIXME
+		return 15*self.charge()
 
 	def p4(self):
 		p4 = ROOT.TLorentzVector()
 		p4.SetPtEtaPhiM(self.pt(),self.eta(),self.phi(),self.mass())
 		return p4
-
 
 #class leadChargedHadrCand:
 #	def dz(): 
