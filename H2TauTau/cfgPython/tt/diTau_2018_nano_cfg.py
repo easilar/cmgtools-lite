@@ -54,6 +54,22 @@ tau_reader = cfg.Analyzer(
    src_class = Tau
 )
 
+from CMGTools.H2TauTau.heppy.objects.muon import Muon
+muon_reader = cfg.Analyzer(
+    Reader,
+   collection_name = 'Muon',
+   output = 'muons',
+   src_class = Muon
+)
+
+from CMGTools.H2TauTau.heppy.objects.electron import Electron
+electron_reader = cfg.Analyzer(
+    Reader,
+   collection_name = 'Electron',
+   output = 'electrons',
+   src_class = Electron
+)
+
 ###############
 # Analyzers 
 ###############
@@ -194,12 +210,23 @@ ntuple = cfg.Analyzer(
 )
 
 
-sequence = cfg.Sequence(
-[
-jet_reader,
-tau_reader,
-]
-)
+sequence_beforedil = cfg.Sequence([
+#       mcweighter,
+#       json,
+#       skim,
+#       vertex,
+#       taus,
+#       muons,
+#       electrons,
+#       genmatcher,
+#       tauenergyscale,
+	jet_reader,
+	tau_reader,
+	muon_reader
+	electron_reader
+])
+
+sequence = sequence_beforedil
 sequence.extend( sequence_dilepton )
 #sequence.append(tauidweighter_general)
 #sequence.append(tauidweighter)
