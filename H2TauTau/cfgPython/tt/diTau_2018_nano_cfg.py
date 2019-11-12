@@ -8,6 +8,8 @@ import PhysicsTools.HeppyCore.framework.config as cfg
 from PhysicsTools.HeppyCore.framework.config import printComps
 from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 
+from CMGTools.H2TauTau.heppy.analyzers.Selector import Selector
+from CMGTools.H2TauTau.heppy.analyzers.Cleaner import Cleaner
 
 import logging
 logging.shutdown()
@@ -135,11 +137,35 @@ tauenergyscale = cfg.Analyzer(
     systematics = False #Later make it True
 )
 
+# third lepton veto =========================================================                  
+def select_muon_third_lepton_veto(muon):
+    return muon.pt() > 10             and \
+        abs(muon.eta()) < 2.4         and \
+        muon.isMediumMuon()  and \
+        abs(muon.dxy()) < 0.045       and \
+        abs(muon.dz())  < 0.2         and \
+        muon.iso_htt() < 0.3
+sel_muons_third_lepton_veto = cfg.Analyzer(
+    Selector,
+    '3lepv_muons',
+    output = 'sel_muons_third_lepton_veto',
+    src = 'muons',
+    filter_func = select_muon_third_lepton_veto
+)
+
+sel_muons_third_lepton_veto_cleaned = cfg.Analyzer(
+    Cleaner,
+    '3lepv_muons_cleaner',
+    output = 'sel_muons_third_lepton_veto_cleaned',
+    src = 'sel_muons_third_lepton_veto',
+    mask = lambda x : [getattr(x,'dileptons_sorted')[0].leg1(),
+                       getattr(x,'dileptons_sorted')[0].leg2()]
+)
+
 
 
 ########### For after dilepton
 
-from CMGTools.H2TauTau.heppy.analyzers.Selector import Selector
 
 
 #This is to select the taus with a certain requirement.
@@ -346,7 +372,9 @@ sequence_beforedil = cfg.Sequence([
 #       electrons,
 #        genmatcher
 	tauenergyscale,
-	met_reader
+	met_reader,
+	sel_muons_third_lepton_veto,
+	sel_muons_third_lepton_veto_cleaned
 ])
 
 sequence = sequence_beforedil
