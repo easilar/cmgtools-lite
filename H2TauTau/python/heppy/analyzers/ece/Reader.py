@@ -14,3 +14,13 @@ class Reader(Analyzer):
 			curr_obj = self.cfg_ana.src_class(tmp_obj)
 			objects.append(curr_obj)
 		setattr(event, self.cfg_ana.output, objects)
+
+class EventInfoReader(Analyzer):
+        '''Read only the desired information from event'''
+
+        def process(self, event):
+		desired_infos = self.cfg_ana.desired_infos
+		for desired_info in desired_infos:
+			res = getattr(event.input, desired_info)
+                	setattr(event, desired_info, res)
+

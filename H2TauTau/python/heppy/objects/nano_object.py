@@ -20,3 +20,5 @@ class NanoObject(object):
     def dummy_value(self, *args, **kwargs):
         return -123
 
+
+

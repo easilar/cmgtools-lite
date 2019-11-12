@@ -20,7 +20,9 @@ class TauIDWeighter(Analyzer):
     @param WPs: dict of the form {<gen_match>:<working_point>,...} to choose which working point to use and apply to the event weight for each gen_match value.
     """
 
-    gen_match_dict = {6:'JetToTau',
+    gen_match_dict = {\
+                      0:'Unknown',
+		      6:'JetToTau',
                       5:'TauID',
                       2:'MuToTaufake',
                       4:'MuToTaufake',

@@ -24,8 +24,15 @@ class Tau(NanoObject):
 		p4.SetPtEtaPhiM(self.pt(),self.eta(),self.phi(),self.mass())
 		return p4
 
-#class leadChargedHadrCand:
-#	def dz(): 
-#		return self.dz()
-#	def dxy(): 
-#		return self.dxy()
+	def __getattr__(self, attr):
+		if attr == 'gen_match':
+			return self.genPartFlav()
+		else:
+			return super(Tau,self).__getattr__(attr)
+
+	def scaleEnergy( self, scale ):
+		p4 = self.p4()
+		p4 *= scale 
+		return p4  
+
+

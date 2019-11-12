@@ -37,7 +37,16 @@ printer = cfg.Analyzer(
 )
 
 
-from CMGTools.H2TauTau.heppy.analyzers.ece.Reader import Reader
+from CMGTools.H2TauTau.heppy.analyzers.ece.Reader import Reader , EventInfoReader
+
+
+from CMGTools.H2TauTau.heppy.objects.event import Event
+eventInfoReader = cfg.Analyzer(
+    EventInfoReader,
+    desired_infos = ['run','luminosityBlock','event'],
+    src_class = Event 
+)
+
 from CMGTools.H2TauTau.heppy.objects.jet import Jet
 jet_reader = cfg.Analyzer(
     Reader, 
@@ -70,11 +79,68 @@ electron_reader = cfg.Analyzer(
    src_class = Electron
 )
 
+from CMGTools.H2TauTau.heppy.objects.met import MET
+met_reader = cfg.Analyzer(
+   EventInfoReader,
+   desired_infos = ['MET_pt','MET_phi','MET_sumEt']
+)
+
+from CMGTools.H2TauTau.heppy.objects.genparticle import GenParticle
+genparticle_reader = cfg.Analyzer(
+    Reader,
+   collection_name = 'GenPart',
+   output = 'GenParticles',
+   src_class = GenParticle
+)
+
+from CMGTools.H2TauTau.heppy.objects.primaryvertex import PrimaryVertex
+primaryvertex_reader = cfg.Analyzer(
+   Reader,
+   collection_name = 'PV',
+   output = 'goodVertices',
+   src_class = PrimaryVertex
+)
+
+
 ###############
 # Analyzers 
 ###############
 
+########### For before dilepton
+
+
+
+def select_leptons(event):
+    leptons = []
+    leptons.extend(event.taus)
+    leptons.extend(event.muons)
+    leptons.extend(event.electrons)
+    return leptons
+
+from CMGTools.H2TauTau.heppy.analyzers.GenMatcherAnalyzer import GenMatcherAnalyzer
+genmatcher = cfg.Analyzer(
+    GenMatcherAnalyzer,
+    'genmatcher',
+    jetCol='jets',
+    genPtCut=8.,
+    genmatching = True,
+    filter_func = select_leptons
+)
+
+from CMGTools.H2TauTau.heppy.analyzers.TauP4Scaler import TauP4Scaler
+tauenergyscale = cfg.Analyzer(
+    TauP4Scaler,
+    'tauenergyscale',
+    src = 'taus',
+    systematics = False #Later make it True
+)
+
+
+
+########### For after dilepton
+
 from CMGTools.H2TauTau.heppy.analyzers.Selector import Selector
+
 
 #This is to select the taus with a certain requirement.
 def select_tau(tau):
@@ -82,6 +148,7 @@ def select_tau(tau):
     #print("compare dz", tau.leadChargedHadrCand().dz() , tau.dz()  )
     #print("tau decayModeFinding",  tau.tauID('decayModeFinding')  )
     #print("tau byVVLooseIsolationMVArun2017v2DBoldDMwLT2017",  tau.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')  )
+    #print("gen_match" , tau.gen_match)
     return tau.pt()    > 40  and \
         abs(tau.eta()) < 2.1 and \
         abs(tau.leadChargedHadrCand().dz()) < 0.2 and \
@@ -169,7 +236,8 @@ tauidweighter = cfg.Analyzer(
     WPs = {'JetToTau':'Tight', # dummy, no weights for jet fakes
            'TauID':'Tight',
            'MuToTaufake':'Loose',
-           'EToTaufake':'VLoose'}
+           'EToTaufake':'VLoose',
+           'Unknown':'Unknown'}
 )
 
 
@@ -187,12 +255,64 @@ nano_tau_vars = Block(
 	tau_q = v(lambda x: x.charge()),
 	tau_dz =  v(lambda x: x.dz()),
 	tau_idDecayMode = v(lambda x: x.idDecayMode()),
-	tau_idMVAoldDM2017v2 = v(lambda x: x.idMVAoldDM2017v2())
+	tau_idMVAoldDM2017v2 = v(lambda x: x.idMVAoldDM2017v2()),
+	tau_gen_match = v(lambda x: x.gen_match)
     	)
+
+event_vars = Block(
+    'event', lambda x: x,
+    run = v(lambda x: x.run, int),
+    lumi = v(lambda x: x.luminosityBlock, int),
+    #event = v(lambda x: x.eventId, int, 'l'),
+    #n_up = v(lambda x: getattr(x, 'NUP', default), int),
+    #n_pu = v(lambda x: getattr(x, 'nPU', default) if getattr(x, 'nPU', default) is not None else default, int),# to handle data and embedded samples
+    #n_pv = v(lambda x: len(x.vertices), int),
+    #rho = v(lambda x: x.rho),
+    #is_data = v(lambda x: x.input.eventAuxiliary().isRealData(), int),
+    )
+
+
+
+electron_vars = Block(
+    'ele' , lambda x: x.electrons[0],
+    ele_pt = v(lambda x: x.pt()),
+    #id_e_mva_nt_loose = v(lambda x: x.physObj.userFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values")),
+    #weight_tracking = v(lambda x: getattr(x, 'weight_trk', 1. )),
+    #iso = v(lambda x: x.iso_htt()),
+    ele_d0 = v(lambda x: x.dxy()),
+    ele_dz = v(lambda x: x.dz()),
+    #weight_trig_e = v(lambda x: getattr(x, 'weight_trigger_e', 1.)),
+    #weight_trig_et = v(lambda x: getattr(x, 'weight_trigger_et', 1.)),
+)
+
+
+muon_vars = Block(
+    'muo' , lambda x: x.muons[0],
+    weight_tracking = v(lambda x: getattr(x, 'weight_tracking', 1. )),
+    #iso = v(lambda x: x.iso_htt()),
+    muo_d0 = v(lambda x: x.dxy()),
+    muo_dz = v(lambda x: x.dz()),
+    weight_trig_m = v(lambda x: getattr(x, 'weight_trigger_m', 1.)),
+    weight_trig_mt = v(lambda x: getattr(x, 'weight_trigger_mt', 1.)),
+)
+
+
+
+metvars = Block(
+    'metvars', lambda x: x,
+    met = v(lambda x: x.MET_pt),
+    metphi = v(lambda x: x.MET_phi),
+)
+
 
 nano_tautau = EventContent(
     [
+    metvars,
+    event_vars,
     nano_tau_vars,
+#    electron_vars,
+#    muon_vars
+#    dilepton_vars
      ]
 )
 
@@ -211,25 +331,28 @@ ntuple = cfg.Analyzer(
 
 
 sequence_beforedil = cfg.Sequence([
+        eventInfoReader,
+	genparticle_reader,
+	jet_reader,
+	tau_reader,
+	muon_reader,
+	electron_reader,
 #       mcweighter,
 #       json,
 #       skim,
 #       vertex,
-#       taus,
+#        taus,
 #       muons,
 #       electrons,
-#       genmatcher,
-#       tauenergyscale,
-	jet_reader,
-	tau_reader,
-	muon_reader
-	electron_reader
+#        genmatcher
+	tauenergyscale,
+	met_reader
 ])
 
 sequence = sequence_beforedil
 sequence.extend( sequence_dilepton )
-#sequence.append(tauidweighter_general)
-#sequence.append(tauidweighter)
+sequence.append(tauidweighter_general)
+sequence.append(tauidweighter)
 sequence.append(printer)
 sequence.append(ntuple)
 
