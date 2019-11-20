@@ -20,17 +20,93 @@ from PhysicsTools.HeppyCore.framework.event import Event
 Event.print_patterns = ['*taus*', '*muons*', '*electrons*', 'veto_*', 
                         '*dileptons_*', '*jets*']
 
+events_to_pick  = [84619,
+84659,
+84710,
+84762,
+84794,
+84838,
+84879,
+84915,
+84944,
+84966,
+85006,
+85054,
+85104,
+85132,
+85176,
+85206,
+85226,
+85224,
+85228,
+85292,
+85367,
+85369,
+85399,
+85424,
+85411,
+85419,
+85446,
+85464,
+85469,
+85510,
+85511,
+85535,
+85541,
+85560,
+85566,
+85625,
+47464,
+47488,
+47493,
+47544,
+47576,
+47610,
+47626,
+47636,
+47642,
+47705,
+47724,
+47732,
+47748,
+47773]
+
+
+#events_to_pick = []
+
 
 ###############
 # Components
 ###############
 
+from CMGTools.RootTools.yellowreport.YRParser import yrparser13TeV
+from CMGTools.RootTools.samples.ComponentCreator import ComponentCreator
+creator = ComponentCreator()
+#ComponentCreator.useLyonAAA = True
+ComponentCreator.useAAA = True
+
+#HiggsVBF125_nano = creator.makeMCComponent('HiggsVBF125_nano', '/VBFHToTauTau_M125_13TeV_powheg_pythia8/RunIISummer16NanoAODv5-PUMoriond17_Nano1June2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM', 'CMS', '.*root', 1.0)
+
+HiggsVBF125_nano = creator.makeMCComponent('HiggsVBF125_nano', '/VBFHToTauTau_M125_13TeV_powheg_pythia8/RunIIFall17NanoAODv5-PU2017_12Apr2018_Nano1June2019_new_pmx_102X_mc2017_realistic_v7-v1/NANOAODSIM', 'CMS', '.*root', 1.0)
 sync = cfg.MCComponent(
     'sync',
-    ['test.root']
+    ['AE1D1509-EE2D-3F49-8109-9595D4963A92.root','90DCD1FC-D0FD-C04D-ACAE-926D2D153A3B.root','08393EF3-F3C3-2745-973E-A6B0E179CCC5.root']
     )
 
+#selectedComponents = [HiggsVBF125_nano]
 selectedComponents = [sync]
+
+
+from CMGTools.H2TauTau.heppy.sequence.common import samples_lists
+from CMGTools.RootTools.utils.splitFactor import splitFactor
+
+n_events_per_job = 1e6
+
+for sample in selectedComponents:
+    sample.splitFactor = splitFactor(sample, n_events_per_job)
+
+
+
 
 
 from CMGTools.H2TauTau.heppy.analyzers.colin.Printer import Printer
@@ -97,10 +173,8 @@ genparticle_reader = cfg.Analyzer(
 
 from CMGTools.H2TauTau.heppy.objects.primaryvertex import PrimaryVertex
 primaryvertex_reader = cfg.Analyzer(
-   Reader,
-   collection_name = 'PV',
-   output = 'goodVertices',
-   src_class = PrimaryVertex
+   EventInfoReader,
+   desired_infos = ['PV_npvsGood','PV_npvs','PV_ndof','PV_x','PV_y','PV_z']
 )
 
 
@@ -137,32 +211,6 @@ tauenergyscale = cfg.Analyzer(
     systematics = False #Later make it True
 )
 
-# third lepton veto =========================================================                  
-def select_muon_third_lepton_veto(muon):
-    return muon.pt() > 10             and \
-        abs(muon.eta()) < 2.4         and \
-        muon.isMediumMuon()  and \
-        abs(muon.dxy()) < 0.045       and \
-        abs(muon.dz())  < 0.2         and \
-        muon.iso_htt() < 0.3
-sel_muons_third_lepton_veto = cfg.Analyzer(
-    Selector,
-    '3lepv_muons',
-    output = 'sel_muons_third_lepton_veto',
-    src = 'muons',
-    filter_func = select_muon_third_lepton_veto
-)
-
-sel_muons_third_lepton_veto_cleaned = cfg.Analyzer(
-    Cleaner,
-    '3lepv_muons_cleaner',
-    output = 'sel_muons_third_lepton_veto_cleaned',
-    src = 'sel_muons_third_lepton_veto',
-    mask = lambda x : [getattr(x,'dileptons_sorted')[0].leg1(),
-                       getattr(x,'dileptons_sorted')[0].leg2()]
-)
-
-
 
 ########### For after dilepton
 
@@ -198,6 +246,13 @@ two_tau = cfg.Analyzer(
     'two_tau',
     src = 'sel_taus',
     filter_func = lambda x : len(x)>1
+)
+
+at_least_one_tau = cfg.Analyzer(
+    EventFilter,
+    'tau',
+    src = 'taus',
+    filter_func = lambda x : len(x)>0
 )
 
 # ditau pair ================================================================
@@ -237,13 +292,14 @@ dilepton_sorted = cfg.Analyzer(
     reverse = False
     )
 
+'''
 sequence_dilepton = cfg.Sequence([
         sel_taus,
         two_tau,
         dilepton,
         dilepton_sorted,
         ])
-
+'''
 
 # weights ================================================================
 
@@ -272,24 +328,45 @@ from CMGTools.H2TauTau.heppy.ntuple.tools import Block , EventContent , Variable
 v = Variable
 
 
-nano_tau_vars = Block(
-    	'tau', lambda x: x.sel_taus[0],
-	tau_pt = v(lambda x: x.pt()),
-	tau_eta = v(lambda x: x.eta()),
-	tau_phi = v(lambda x: x.phi()),
-	tau_m = v(lambda x: x.mass()),
-	tau_q = v(lambda x: x.charge()),
-	tau_dz =  v(lambda x: x.dz()),
-	tau_idDecayMode = v(lambda x: x.idDecayMode()),
-	tau_idMVAoldDM2017v2 = v(lambda x: x.idMVAoldDM2017v2()),
-	tau_gen_match = v(lambda x: x.gen_match)
+nano_tau1_vars = Block(
+    	'tau1', lambda x: x.sel_taus[0],
+	tau1_pt = v(lambda x: x.pt()),
+	tau1_eta = v(lambda x: x.eta()),
+	tau1_phi = v(lambda x: x.phi()),
+	tau1_m = v(lambda x: x.mass()),
+	tau1_q = v(lambda x: x.charge()),
+	tau1_dz =  v(lambda x: x.dz()),
+        tau1_decayMode = v(lambda x: x.decayMode()),
+        tau1_idDecayMode = v(lambda x: x.tauID('decayModeFinding')),
+        tau1_idDecayModeNewDMs = v(lambda x: x.tauID('decayModeFindingNewDMs')),
+	tau1_idMVAoldDM2017v2 = v(lambda x: x.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')),
+	tau1_gen_match = v(lambda x: x.gen_match)
     	)
+
+
+nano_tau2_vars = Block(
+    	'tau2', lambda x: x.sel_taus[1],
+	tau2_pt = v(lambda x: x.pt()),
+	tau2_eta = v(lambda x: x.eta()),
+	tau2_phi = v(lambda x: x.phi()),
+	tau2_m = v(lambda x: x.mass()),
+	tau2_q = v(lambda x: x.charge()),
+	tau2_dz =  v(lambda x: x.dz()),
+        tau2_decayMode = v(lambda x: x.decayMode()),
+        tau2_idDecayMode = v(lambda x: x.tauID('decayModeFinding')),
+        tau2_idDecayModeNewDMs = v(lambda x: x.tauID('decayModeFindingNewDMs')),
+	tau2_idMVAoldDM2017v2 = v(lambda x: x.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')),
+	tau2_gen_match = v(lambda x: x.gen_match)
+    	)
+
+
 
 event_vars = Block(
     'event', lambda x: x,
     run = v(lambda x: x.run, int),
     lumi = v(lambda x: x.luminosityBlock, int),
-    #event = v(lambda x: x.eventId, int, 'l'),
+    event = v(lambda x: x.event, int, 'l'),
+    pv = v(lambda x:x.PV_z),
     #n_up = v(lambda x: getattr(x, 'NUP', default), int),
     #n_pu = v(lambda x: getattr(x, 'nPU', default) if getattr(x, 'nPU', default) is not None else default, int),# to handle data and embedded samples
     #n_pv = v(lambda x: len(x.vertices), int),
@@ -314,12 +391,13 @@ electron_vars = Block(
 
 muon_vars = Block(
     'muo' , lambda x: x.muons[0],
-    weight_tracking = v(lambda x: getattr(x, 'weight_tracking', 1. )),
-    #iso = v(lambda x: x.iso_htt()),
+    muo_weight_tracking = v(lambda x: getattr(x, 'weight_tracking', 1. )),
+    muo_iso = v(lambda x: x.iso_htt()),
+    muo_pt = v(lambda x: x.pt()),
     muo_d0 = v(lambda x: x.dxy()),
     muo_dz = v(lambda x: x.dz()),
-    weight_trig_m = v(lambda x: getattr(x, 'weight_trigger_m', 1.)),
-    weight_trig_mt = v(lambda x: getattr(x, 'weight_trigger_mt', 1.)),
+    muo_weight_trig_m = v(lambda x: getattr(x, 'weight_trigger_m', 1.)),
+    muo_weight_trig_mt = v(lambda x: getattr(x, 'weight_trigger_mt', 1.)),
 )
 
 
@@ -333,9 +411,10 @@ metvars = Block(
 
 nano_tautau = EventContent(
     [
-    metvars,
+#    metvars,
     event_vars,
-    nano_tau_vars,
+    nano_tau1_vars,
+    nano_tau2_vars,
 #    electron_vars,
 #    muon_vars
 #    dilepton_vars
@@ -358,11 +437,15 @@ ntuple = cfg.Analyzer(
 
 sequence_beforedil = cfg.Sequence([
         eventInfoReader,
-	genparticle_reader,
-	jet_reader,
+#	genparticle_reader,
+#	jet_reader,
+        primaryvertex_reader,
 	tau_reader,
+        sel_taus,
+	two_tau
+#	at_least_one_tau
 	muon_reader,
-	electron_reader,
+#	electron_reader,
 #       mcweighter,
 #       json,
 #       skim,
@@ -371,18 +454,27 @@ sequence_beforedil = cfg.Sequence([
 #       muons,
 #       electrons,
 #        genmatcher
-	tauenergyscale,
-	met_reader,
-	sel_muons_third_lepton_veto,
-	sel_muons_third_lepton_veto_cleaned
+#	tauenergyscale,
+#	met_reader,
+#	sel_muons_third_lepton_veto,
+#	sel_muons_third_lepton_veto_cleaned
 ])
 
+
+
 sequence = sequence_beforedil
-sequence.extend( sequence_dilepton )
-sequence.append(tauidweighter_general)
-sequence.append(tauidweighter)
+#sequence.extend( sequence_dilepton )
+#sequence.append(tauidweighter_general)
+#sequence.append(tauidweighter)
 sequence.append(printer)
 sequence.append(ntuple)
+
+
+if events_to_pick:
+    from CMGTools.H2TauTau.htt_ntuple_base_cff import eventSelector
+    eventSelector.toSelect = events_to_pick
+    sequence.insert(0, eventSelector)
+
 
 from PhysicsTools.HeppyCore.framework.chain import Chain as Events
 Events.tree_name = 'Events'

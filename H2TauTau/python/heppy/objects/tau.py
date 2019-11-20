@@ -11,7 +11,7 @@ class Tau(NanoObject):
 		tauID_dict = {
 		"decayModeFinding":self.idDecayMode(),
 		"decayModeFindingNewDMs":self.idDecayModeNewDMs(),
-		"byVVLooseIsolationMVArun2017v2DBoldDMwLT2017":self.idMVAoldDM2017v2()==0, # VVLoose: 2^0=1  
+		"byVVLooseIsolationMVArun2017v2DBoldDMwLT2017":self.idMVAoldDM2017v2()>=1 , 
 		"byIsolationMVArun2017v2DBoldDMwLTraw2017":self.rawMVAoldDM2017v2()
 		}
 		return tauID_dict[mode]
