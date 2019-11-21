@@ -35,7 +35,8 @@ add_sys = getHeppyOption('add_sys', True)
 reapplyJEC = getHeppyOption('reapplyJEC', True)
 samples_name = getHeppyOption('samples_name', 'embedded_tt') # options : DY, TTbar, generic_background, data_tau, data_single_muon, data_single_electron, embedded_tt, embedded_mt, embedded_et, sm_higgs, mssm_signals
 AAA = getHeppyOption('AAA', 'Lyon') # options : global, Lyon
-
+samples_name = 'sm_higgs'
+print(samples_name)
 from CMGTools.RootTools.samples.ComponentCreator import ComponentCreator
 if AAA == 'Lyon':
     ComponentCreator.useLyonAAA = True
@@ -61,6 +62,8 @@ from CMGTools.H2TauTau.proto.samples.fall17.triggers_tauTau import mc_triggers, 
 from CMGTools.H2TauTau.proto.samples.fall17.triggers_tauTau import data_triggers, data_triggerfilters, embedded_triggerfilters
 
 selectedComponents = samples_lists[samples_name]
+
+print(len(selectedComponents))
 
 n_events_per_job = 1e6
 if test:
@@ -248,6 +251,9 @@ if syncntuple:
     skim_func = lambda x: True
 else:
     skim_func = lambda x: skim_KIT
+
+skim_func = True
+
 
 from CMGTools.H2TauTau.heppy.analyzers.NtupleProducer import NtupleProducer
 from CMGTools.H2TauTau.heppy.ntuple.ntuple_variables import tautau as event_content_tautau

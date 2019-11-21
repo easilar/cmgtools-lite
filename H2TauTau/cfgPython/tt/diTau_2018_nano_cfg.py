@@ -20,56 +20,49 @@ from PhysicsTools.HeppyCore.framework.event import Event
 Event.print_patterns = ['*taus*', '*muons*', '*electrons*', 'veto_*', 
                         '*dileptons_*', '*jets*']
 
-events_to_pick  = [84619,
-84659,
-84710,
-84762,
-84794,
-84838,
-84879,
-84915,
-84944,
-84966,
-85006,
-85054,
-85104,
-85132,
-85176,
-85206,
-85226,
-85224,
-85228,
-85292,
-85367,
-85369,
-85399,
-85424,
-85411,
-85419,
-85446,
-85464,
-85469,
-85510,
-85511,
-85535,
-85541,
-85560,
-85566,
-85625,
-47464,
-47488,
-47493,
-47544,
-47576,
-47610,
-47626,
-47636,
-47642,
-47705,
-47724,
-47732,
-47748,
-47773]
+events_to_pick  = [84575,\
+84574,\
+84580,\
+84579,\
+84593,\
+84603,\
+84605,\
+84607,\
+84606,\
+84610,\
+84616,\
+84617,\
+84636,\
+84633,\
+84634,\
+84653,\
+84655,\
+84628,\
+1403781,\
+1403789,\
+1403795,\
+1403798,\
+1403805,\
+1403811,\
+1403818,\
+1403823,\
+1403828,\
+1403837,\
+1403838,\
+1403841,\
+1403852,\
+1403853,\
+1403862,\
+1403863,\
+1403873,\
+1403860,\
+1403878,\
+1403872,\
+1403881,\
+1403880,\
+1403876,\
+1403870]
+
 
 
 #events_to_pick = []
@@ -238,6 +231,23 @@ sel_taus = cfg.Analyzer(
     filter_func = select_tau  
 )
 
+def select_muon_third_lepton_veto(muon):
+    return muon.pt() > 10             and \
+        abs(muon.eta()) < 2.4         and \
+        muon.isMediumMuon()  and \
+        abs(muon.dxy()) < 0.045       and \
+        abs(muon.dz())  < 0.2         and \
+        muon.iso_htt < 0.3
+
+sel_muons_third_lepton_veto = cfg.Analyzer(
+    Selector,
+    '3lepv_muons',
+    output = 'sel_muons_third_lepton_veto',
+    src = 'muons',
+    filter_func = select_muon_third_lepton_veto
+)
+
+
 from CMGTools.H2TauTau.heppy.analyzers.EventFilter import EventFilter
 
 #This is to require an event with at least 2 tau in it.
@@ -252,6 +262,13 @@ at_least_one_tau = cfg.Analyzer(
     EventFilter,
     'tau',
     src = 'taus',
+    filter_func = lambda x : len(x)>0
+)
+
+at_least_one_muo = cfg.Analyzer(
+    EventFilter,
+    'muo',
+    src = 'sel_muons_third_lepton_veto',
     filter_func = lambda x : len(x)>0
 )
 
@@ -390,10 +407,12 @@ electron_vars = Block(
 
 
 muon_vars = Block(
-    'muo' , lambda x: x.muons[0],
+    'muo' , lambda x: x.sel_muons_third_lepton_veto[0],
     muo_weight_tracking = v(lambda x: getattr(x, 'weight_tracking', 1. )),
-    muo_iso = v(lambda x: x.iso_htt()),
+    muo_iso = v(lambda x: x.iso_htt),
     muo_pt = v(lambda x: x.pt()),
+    muo_phi = v(lambda x: x.phi()),
+    muo_eta = v(lambda x: x.eta()),
     muo_d0 = v(lambda x: x.dxy()),
     muo_dz = v(lambda x: x.dz()),
     muo_weight_trig_m = v(lambda x: getattr(x, 'weight_trigger_m', 1.)),
@@ -413,10 +432,10 @@ nano_tautau = EventContent(
     [
 #    metvars,
     event_vars,
-    nano_tau1_vars,
-    nano_tau2_vars,
+#    nano_tau1_vars,
+#    nano_tau2_vars,
 #    electron_vars,
-#    muon_vars
+    muon_vars
 #    dilepton_vars
      ]
 )
@@ -440,11 +459,13 @@ sequence_beforedil = cfg.Sequence([
 #	genparticle_reader,
 #	jet_reader,
         primaryvertex_reader,
-	tau_reader,
-        sel_taus,
-	two_tau
+#	tau_reader,
+#        sel_taus,
+#	two_tau,
 #	at_least_one_tau
 	muon_reader,
+	sel_muons_third_lepton_veto,
+	at_least_one_muo
 #	electron_reader,
 #       mcweighter,
 #       json,
