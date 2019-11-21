@@ -65,7 +65,7 @@ events_to_pick  = [84575,\
 
 
 
-#events_to_pick = []
+events_to_pick = []
 
 
 ###############
