@@ -1,6 +1,11 @@
 import ROOT
 from nano_object import NanoObject
 
+def calc_p4(obj):
+        p4 = ROOT.TLorentzVector()
+        p4.SetPtEtaPhiM(obj.pt(),obj.eta(),obj.phi(),obj.mass())
+        return p4
+
 class Muon(NanoObject):
 
 
@@ -14,3 +19,9 @@ class Muon(NanoObject):
 
 	def isMediumMuon(self):
 		return	self.mediumId()
+
+	def p4(self):
+                return calc_p4(self)
+
+
+

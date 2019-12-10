@@ -147,6 +147,7 @@ def select_leptons(event):
     leptons.extend(event.taus)
     leptons.extend(event.muons)
     leptons.extend(event.electrons)
+    if len(leptons)>0 and abs(leptons[0].pdgId())==11 : print("event:", event.eventId  , "lepton pt", leptons[0].pt())
     return leptons
 
 from CMGTools.H2TauTau.heppy.analyzers.GenMatcherAnalyzer import GenMatcherAnalyzer
@@ -175,6 +176,7 @@ def select_muon_third_lepton_veto(muon):
         abs(muon.dxy()) < 0.045       and \
         abs(muon.dz())  < 0.2         and \
         muon.iso_htt() < 0.3
+
 sel_muons_third_lepton_veto = cfg.Analyzer(
     Selector,
     '3lepv_muons',
@@ -193,14 +195,14 @@ sel_muons_third_lepton_veto_cleaned = cfg.Analyzer(
 )
 
 def select_electron_third_lepton_veto(electron):
-    return electron.pt() > 10             and \
-        abs(electron.eta()) < 2.5         and \
-        electron.id_passes("mvaEleID-Fall17-noIso-V2", "wp90") and \
-        abs(electron.dxy()) < 0.045       and \
-        abs(electron.dz())  < 0.2         and \
-        electron.passConversionVeto()     and \
-        electron.gsfTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS) <= 1 and \
-        electron.iso_htt() < 0.3
+    	return electron.pt() > 10             and \
+		abs(electron.eta()) < 2.5         and \
+		electron.id_passes("mvaEleID-Fall17-noIso-V2", "wp90") and \
+		abs(electron.dxy()) < 0.045       and \
+		abs(electron.dz())  < 0.2         and \
+		electron.passConversionVeto()     and \
+		electron.gsfTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS) <= 1 and \
+		electron.iso_htt() < 0.3
 sel_electrons_third_lepton_veto = cfg.Analyzer(
     Selector,
     '3lepv_electrons',

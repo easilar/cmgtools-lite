@@ -20,51 +20,6 @@ from PhysicsTools.HeppyCore.framework.event import Event
 Event.print_patterns = ['*taus*', '*muons*', '*electrons*', 'veto_*', 
                         '*dileptons_*', '*jets*']
 
-events_to_pick  = [84575,\
-84574,\
-84580,\
-84579,\
-84593,\
-84603,\
-84605,\
-84607,\
-84606,\
-84610,\
-84616,\
-84617,\
-84636,\
-84633,\
-84634,\
-84653,\
-84655,\
-84628,\
-1403781,\
-1403789,\
-1403795,\
-1403798,\
-1403805,\
-1403811,\
-1403818,\
-1403823,\
-1403828,\
-1403837,\
-1403838,\
-1403841,\
-1403852,\
-1403853,\
-1403862,\
-1403863,\
-1403873,\
-1403860,\
-1403878,\
-1403872,\
-1403881,\
-1403880,\
-1403876,\
-1403870]
-
-
-
 events_to_pick = []
 
 
@@ -83,7 +38,7 @@ ComponentCreator.useAAA = True
 HiggsVBF125_nano = creator.makeMCComponent('HiggsVBF125_nano', '/VBFHToTauTau_M125_13TeV_powheg_pythia8/RunIIFall17NanoAODv5-PU2017_12Apr2018_Nano1June2019_new_pmx_102X_mc2017_realistic_v7-v1/NANOAODSIM', 'CMS', '.*root', 1.0)
 sync = cfg.MCComponent(
     'sync',
-    ['AE1D1509-EE2D-3F49-8109-9595D4963A92.root','90DCD1FC-D0FD-C04D-ACAE-926D2D153A3B.root','08393EF3-F3C3-2745-973E-A6B0E179CCC5.root']
+    ['data/nano/AE1D1509-EE2D-3F49-8109-9595D4963A92.root','data/nano/90DCD1FC-D0FD-C04D-ACAE-926D2D153A3B.root','data/nano/08393EF3-F3C3-2745-973E-A6B0E179CCC5.root']
     )
 
 #selectedComponents = [HiggsVBF125_nano]
@@ -93,11 +48,11 @@ selectedComponents = [sync]
 from CMGTools.H2TauTau.heppy.sequence.common import samples_lists
 from CMGTools.RootTools.utils.splitFactor import splitFactor
 
-n_events_per_job = 1e6
+#n_events_per_job = 1e6
+n_events_per_job = 5e5
 
 for sample in selectedComponents:
     sample.splitFactor = splitFactor(sample, n_events_per_job)
-
 
 
 
@@ -204,6 +159,9 @@ tauenergyscale = cfg.Analyzer(
     systematics = False #Later make it True
 )
 
+from CMGTools.H2TauTau.heppy.sequence.common import debugger
+debugger.condition = None #lambda event : True # lambda event : len(event.sel_taus)>2
+#debugger.condition = lambda event : True # lambda event : len(event.sel_taus)>2
 
 ########### For after dilepton
 
@@ -211,11 +169,6 @@ tauenergyscale = cfg.Analyzer(
 
 #This is to select the taus with a certain requirement.
 def select_tau(tau):
-    #print("tau before selection: ", tau.pt()  )
-    #print("compare dz", tau.leadChargedHadrCand().dz() , tau.dz()  )
-    #print("tau decayModeFinding",  tau.tauID('decayModeFinding')  )
-    #print("tau byVVLooseIsolationMVArun2017v2DBoldDMwLT2017",  tau.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')  )
-    #print("gen_match" , tau.gen_match)
     return tau.pt()    > 40  and \
         abs(tau.eta()) < 2.1 and \
         abs(tau.leadChargedHadrCand().dz()) < 0.2 and \
@@ -247,6 +200,25 @@ sel_muons_third_lepton_veto = cfg.Analyzer(
     filter_func = select_muon_third_lepton_veto
 )
 
+def select_electron_third_lepton_veto(electron):
+    return electron.pt() > 10             and \
+        abs(electron.eta()) < 2.5         and \
+        electron.id_passes("mvaEleID-Fall17-noIso-V2", "wp90") and \
+        abs(electron.dxy()) < 0.045       and \
+        abs(electron.dz())  < 0.2         and \
+        electron.passConversionVeto()     and \
+	electron.lostHits() <= 1 and \
+        electron.iso_htt() < 0.3
+
+sel_electrons_third_lepton_veto = cfg.Analyzer(
+    Selector,
+    '3lepv_electrons',
+    output = 'sel_electrons_third_lepton_veto',
+    src = 'electrons',
+    filter_func = select_electron_third_lepton_veto
+)
+
+
 
 from CMGTools.H2TauTau.heppy.analyzers.EventFilter import EventFilter
 
@@ -272,6 +244,13 @@ at_least_one_muo = cfg.Analyzer(
     filter_func = lambda x : len(x)>0
 )
 
+at_least_one_ele = cfg.Analyzer(
+    EventFilter,
+    'ele',
+    src = 'sel_electrons_third_lepton_veto',
+    filter_func = lambda x : len(x)>0
+)
+
 # ditau pair ================================================================
 
 from CMGTools.H2TauTau.heppy.analyzers.DiLeptonAnalyzer import DiLeptonAnalyzer
@@ -287,7 +266,6 @@ dilepton = cfg.Analyzer(
 def sorting_metric(dilepton):
     leg1_iso = dilepton.leg1().tauID('byIsolationMVArun2017v2DBoldDMwLTraw2017')
     leg2_iso = dilepton.leg2().tauID('byIsolationMVArun2017v2DBoldDMwLTraw2017')
-    print("I am in the sorting metric")
     if leg1_iso > leg2_iso:
         most_isolated_tau_isolation = leg1_iso
         most_isolated_tau_pt = dilepton.leg1().pt()
@@ -309,14 +287,49 @@ dilepton_sorted = cfg.Analyzer(
     reverse = False
     )
 
-'''
 sequence_dilepton = cfg.Sequence([
         sel_taus,
         two_tau,
         dilepton,
         dilepton_sorted,
         ])
-'''
+# Jets ===================================================================
+
+from CMGTools.H2TauTau.heppy.analyzers.Sorter import Sorter
+jet_sorter = cfg.Analyzer(
+    Sorter,
+    output = 'jets_sorted',
+    src = 'jets',
+    metric = lambda jet: (jet.pt()),
+    reverse = True
+    )
+
+jets_20_unclean = cfg.Analyzer(
+    Selector,
+    'jets_20_unclean',
+    output = 'jets_20_unclean',
+    src = 'jets_sorted',
+    filter_func = lambda x : x.pt()>20 and abs(x.eta())<4.7 and x.jetID("POG_PFID_Tight")
+)
+
+
+from CMGTools.H2TauTau.heppy.analyzers.JetCleaner import JetCleaner
+jet_20 = cfg.Analyzer(
+    JetCleaner,
+    output = 'jets_20',
+    dileptons = 'dileptons_sorted',
+    jets = 'jets_20_unclean',
+    drmin = 0.5
+)
+
+jets_30 = cfg.Analyzer(
+    Selector,
+    'jets_30',
+    output = 'jets_30',
+    src = 'jets_20',
+    filter_func = lambda x : x.pt()>30 
+)
+
 
 # weights ================================================================
 
@@ -340,14 +353,14 @@ tauidweighter = cfg.Analyzer(
 )
 
 
-
 from CMGTools.H2TauTau.heppy.ntuple.tools import Block , EventContent , Variable , to_leg
 v = Variable
-
+default = v.default
 
 nano_tau1_vars = Block(
     	'tau1', lambda x: x.sel_taus[0],
-	tau1_pt = v(lambda x: x.pt()),
+	#tau1_rawpt = v(lambda x: x.unscaledP4.Pt()),
+	tau1_pt = v(lambda x: x.p4().Pt()),
 	tau1_eta = v(lambda x: x.eta()),
 	tau1_phi = v(lambda x: x.phi()),
 	tau1_m = v(lambda x: x.mass()),
@@ -357,13 +370,15 @@ nano_tau1_vars = Block(
         tau1_idDecayMode = v(lambda x: x.tauID('decayModeFinding')),
         tau1_idDecayModeNewDMs = v(lambda x: x.tauID('decayModeFindingNewDMs')),
 	tau1_idMVAoldDM2017v2 = v(lambda x: x.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')),
-	tau1_gen_match = v(lambda x: x.gen_match)
+	tau1_gen_match = v(lambda x: x.gen_match),
+	#tau1_energyScale = v(lambda x: x.energyScale)
     	)
 
 
 nano_tau2_vars = Block(
     	'tau2', lambda x: x.sel_taus[1],
-	tau2_pt = v(lambda x: x.pt()),
+	#tau2_rawpt = v(lambda x: x.unscaledP4.Pt()),
+	tau2_pt = v(lambda x: x.p4().Pt()),
 	tau2_eta = v(lambda x: x.eta()),
 	tau2_phi = v(lambda x: x.phi()),
 	tau2_m = v(lambda x: x.mass()),
@@ -373,7 +388,8 @@ nano_tau2_vars = Block(
         tau2_idDecayMode = v(lambda x: x.tauID('decayModeFinding')),
         tau2_idDecayModeNewDMs = v(lambda x: x.tauID('decayModeFindingNewDMs')),
 	tau2_idMVAoldDM2017v2 = v(lambda x: x.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')),
-	tau2_gen_match = v(lambda x: x.gen_match)
+	tau2_gen_match = v(lambda x: x.gen_match),
+	#tau2_energyScale = v(lambda x: x.energyScale)
     	)
 
 
@@ -394,16 +410,20 @@ event_vars = Block(
 
 
 electron_vars = Block(
-    'ele' , lambda x: x.electrons[0],
+        'ele', lambda x: x.sel_electrons_third_lepton_veto[0],
+    #ele_id_e_mva_nt_loose = v(lambda x: x.physObj.userFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values")),
+    ele_weight_tracking = v(lambda x: getattr(x, 'weight_trk', 1. )),
     ele_pt = v(lambda x: x.pt()),
-    #id_e_mva_nt_loose = v(lambda x: x.physObj.userFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values")),
-    #weight_tracking = v(lambda x: getattr(x, 'weight_trk', 1. )),
-    #iso = v(lambda x: x.iso_htt()),
-    ele_d0 = v(lambda x: x.dxy()),
+    ele_eta = v(lambda x: x.eta()),
+    ele_phi = v(lambda x: x.phi()),
+    ele_iso = v(lambda x: x.iso_htt()),
+    ele_dxy = v(lambda x: x.dxy()),
     ele_dz = v(lambda x: x.dz()),
-    #weight_trig_e = v(lambda x: getattr(x, 'weight_trigger_e', 1.)),
-    #weight_trig_et = v(lambda x: getattr(x, 'weight_trigger_et', 1.)),
+    ele_weight_trig_e = v(lambda x: getattr(x, 'weight_trigger_e', 1.)),
+    ele_weight_trig_et = v(lambda x: getattr(x, 'weight_trigger_et', 1.)),
 )
+
+
 
 
 muon_vars = Block(
@@ -413,12 +433,21 @@ muon_vars = Block(
     muo_pt = v(lambda x: x.pt()),
     muo_phi = v(lambda x: x.phi()),
     muo_eta = v(lambda x: x.eta()),
-    muo_d0 = v(lambda x: x.dxy()),
+    muo_dxy = v(lambda x: x.dxy()),
     muo_dz = v(lambda x: x.dz()),
     muo_weight_trig_m = v(lambda x: getattr(x, 'weight_trigger_m', 1.)),
     muo_weight_trig_mt = v(lambda x: getattr(x, 'weight_trigger_mt', 1.)),
 )
 
+
+dilepton_vars = Block(
+    'dilepton', lambda x: [x.dileptons_sorted[0],x.pfmet],
+    m_vis = v(lambda x: x[0].mass()),
+    mt_tot = v(lambda x: x[0].mtTotal(x[1])),
+    l1_mt = v(lambda x: x[0].mTLeg1(x[1])),
+    l2_mt = v(lambda x: x[0].mTLeg2(x[1])),
+    pt_tt = v(lambda x: x[0].pt_tt(x[1]))
+)
 
 
 metvars = Block(
@@ -427,6 +456,30 @@ metvars = Block(
     metphi = v(lambda x: x.MET_phi),
 )
 
+jets20 = Block(
+    'jets20', lambda x: x.jets_20,
+    n_jets_pt20 = v(lambda x: len(x), int),
+    j1_pt = v(lambda x: x[0].pt() if len(x)>0 else default),
+    j1_eta = v(lambda x: x[0].eta() if len(x)>0 else default),
+    j1_phi = v(lambda x: x[0].phi() if len(x)>0 else default),
+    # j1_bcsv = v(lambda x: x.bcsv()),
+    j1_pumva = v(lambda x: x[0].puMva('pileupJetId:fullDiscriminant') if len(x)>0 else default),
+#    j1_puid = v(lambda x: x[0].pileUpJetId_htt() if len(x)>0 else default),
+    j1_flavour_parton = v(lambda x: x[0].partonFlavour() if len(x)>0 else default),
+    j1_flavour_hadron = v(lambda x: x[0].hadronFlavour() if len(x)>0 else default),
+    j1_rawf = v(lambda x: x[0].rawFactor() if len(x)>0 else default),
+    j2_pt = v(lambda x: x[1].pt() if len(x)>1 else default),
+    j2_eta = v(lambda x: x[1].eta() if len(x)>1 else default),
+    j2_phi = v(lambda x: x[1].phi() if len(x)>1 else default),
+    j2_pumva = v(lambda x: x[1].puMva('pileupJetId:fullDiscriminant') if len(x)>1 else default ),
+#    j2_puid = v(lambda x: x[1].pileUpJetId_htt() if len(x)>1 else default ),
+    j2_flavour_parton = v(lambda x: x[1].partonFlavour() if len(x)>1 else default),
+    j2_flavour_hadron = v(lambda x: x[1].hadronFlavour() if len(x)>1 else default),
+    j2_rawf = v(lambda x: x[1].rawFactor() if len(x)>1 else default),
+    dijet_m = v(lambda x: (x[0].p4()+x[1].p4()).M() if len(x)>1 else default),
+)
+
+
 
 nano_tautau = EventContent(
     [
@@ -434,8 +487,9 @@ nano_tautau = EventContent(
     event_vars,
 #    nano_tau1_vars,
 #    nano_tau2_vars,
+    jets20
 #    electron_vars,
-    muon_vars
+#    muon_vars
 #    dilepton_vars
      ]
 )
@@ -459,14 +513,13 @@ sequence_beforedil = cfg.Sequence([
 #	genparticle_reader,
 #	jet_reader,
         primaryvertex_reader,
-#	tau_reader,
-#        sel_taus,
-#	two_tau,
-#	at_least_one_tau
-	muon_reader,
-	sel_muons_third_lepton_veto,
-	at_least_one_muo
+	tau_reader,
+#	muon_reader,
+#	sel_muons_third_lepton_veto,
+#	at_least_one_muo
 #	electron_reader,
+#        sel_electrons_third_lepton_veto,
+#        at_least_one_ele
 #       mcweighter,
 #       json,
 #       skim,
@@ -476,18 +529,28 @@ sequence_beforedil = cfg.Sequence([
 #       electrons,
 #        genmatcher
 #	tauenergyscale,
+#        sel_taus,
+#	two_tau
 #	met_reader,
 #	sel_muons_third_lepton_veto,
 #	sel_muons_third_lepton_veto_cleaned
 ])
 
 
-
+sequence_jets = cfg.Sequence([
+	jet_reader,
+        jet_sorter,
+        jets_20_unclean,
+        jet_20,
+        jets_30,
+])
 sequence = sequence_beforedil
-#sequence.extend( sequence_dilepton )
+sequence.extend( sequence_dilepton )
+sequence.extend(sequence_jets)
 #sequence.append(tauidweighter_general)
 #sequence.append(tauidweighter)
 sequence.append(printer)
+sequence.append(debugger)
 sequence.append(ntuple)
 
 

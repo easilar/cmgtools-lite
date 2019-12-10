@@ -4,3 +4,7 @@ class Jet(NanoObject):
     
     def this_is_what_we_want(self):
         return 1
+
+    def jetID(self):
+	return self.jetId()	
+

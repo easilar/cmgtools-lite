@@ -53,64 +53,19 @@ from CMGTools.RootTools.utils.splitFactor import splitFactor
 
 selectedComponents = samples_lists[samples_name]
 
-n_events_per_job = 1e6
+n_events_per_job = 3e5
+#n_events_per_job = 3e6
 
 for sample in selectedComponents:
     sample.splitFactor = splitFactor(sample, n_events_per_job)
        
-events_to_pick  = [84619,
-84659,
-84710,
-84762,
-84794,
-84838,
-84879,
-84915,
-84944,
-84966,
-85006,
-85054,
-85104,
-85132,
-85176,
-85206,
-85226,
-85224,
-85228,
-85292,
-85367,
-85369,
-85399,
-85424,
-85411,
-85419,
-85446,
-85464,
-85469,
-85510,
-85511,
-85535,
-85541,
-85560,
-85566,
-85625,
-47464,
-47488,
-47493,
-47544,
-47576,
-47610,
-47626,
-47636,
-47642,
-47705,
-47724,
-47732,
-47748,
-47773] 
 
 events_to_pick  = []
 
+
+from CMGTools.H2TauTau.heppy.sequence.common import debugger
+debugger.condition = None  #lambda event : True # lambda event : len(event.sel_taus)>2
+#debugger.condition = lambda event : True # lambda event : len(event.sel_taus)>2
 
 ###############
 # Analyzers 
@@ -159,6 +114,21 @@ from PhysicsTools.Heppy.physicsobjects.Muon import Muon
 Muon.iso_htt = lambda x: x.relIso(0.4, 'dbeta', dbeta_factor=0.5,
                                   all_charged=False)
 
+from CMGTools.H2TauTau.heppy.analyzers.ElectronAnalyzer import ElectronAnalyzer
+electrons = cfg.Analyzer(
+    ElectronAnalyzer,
+    output = 'electrons',
+    electrons = 'slimmedElectrons',
+)
+
+# setting up an alias for our isolation, now use iso_htt everywhere
+from PhysicsTools.Heppy.physicsobjects.Electron import Electron
+from PhysicsTools.Heppy.physicsutils.EffectiveAreas import areas
+
+Electron.EffectiveArea03 = areas['Fall17']['electron']
+
+Electron.iso_htt = lambda x: x.relIso(0.3, "EA",
+                                      all_charged=False)
 
 from CMGTools.H2TauTau.heppy.analyzers.EventFilter import EventFilter
 
@@ -177,6 +147,14 @@ at_least_one_muo = cfg.Analyzer(
     src = 'sel_muons_third_lepton_veto',
     filter_func = lambda x : len(x)>0
 )
+
+at_least_one_ele = cfg.Analyzer(
+    EventFilter,
+    'ele',
+    src = 'sel_electrons_third_lepton_veto',
+    filter_func = lambda x : len(x)>0
+)
+
 
 
 from CMGTools.H2TauTau.heppy.analyzers.Selector import Selector
@@ -204,6 +182,32 @@ two_tau = cfg.Analyzer(
     filter_func = lambda x : len(x)>1
 )
 
+def select_leptons(event):
+    leptons = []
+    leptons.extend(event.taus)
+    leptons.extend(event.muons)
+    leptons.extend(event.electrons)
+    return leptons
+
+from CMGTools.H2TauTau.heppy.analyzers.GenMatcherAnalyzer import GenMatcherAnalyzer
+genmatcher = cfg.Analyzer(
+    GenMatcherAnalyzer, 
+    'genmatcher',
+    jetCol='slimmedJets',
+    genPtCut=8.,
+    genmatching = True,
+    filter_func = select_leptons
+)
+
+from CMGTools.H2TauTau.heppy.analyzers.TauP4Scaler import TauP4Scaler
+tauenergyscale = cfg.Analyzer(
+    TauP4Scaler,
+    'tauenergyscale',
+    src = 'taus',
+    systematics = False
+)
+
+
 def select_muon_third_lepton_veto(muon):
     return muon.pt() > 10             and \
         abs(muon.eta()) < 2.4         and \
@@ -219,6 +223,23 @@ sel_muons_third_lepton_veto = cfg.Analyzer(
     filter_func = select_muon_third_lepton_veto
 )
 
+
+def select_electron_third_lepton_veto(electron):
+    return electron.pt() > 10             and \
+        abs(electron.eta()) < 2.5         and \
+        electron.id_passes("mvaEleID-Fall17-noIso-V2", "wp90") and \
+        abs(electron.dxy()) < 0.045       and \
+        abs(electron.dz())  < 0.2         and \
+        electron.passConversionVeto()     and \
+        electron.gsfTrack().hitPattern().numberOfLostHits(ROOT.reco.HitPattern.MISSING_INNER_HITS) <= 1 and \
+        electron.iso_htt() < 0.3
+sel_electrons_third_lepton_veto = cfg.Analyzer(
+    Selector,
+    '3lepv_electrons',
+    output = 'sel_electrons_third_lepton_veto',
+    src = 'electrons',
+    filter_func = select_electron_third_lepton_veto
+)
 
 
 # ditau pair ================================================================
@@ -268,6 +289,60 @@ sequence_dilepton = cfg.Sequence([
         dilepton,
         dilepton_sorted,
         ])
+# Jet sequence ==========================================================
+gt_mc = 'Fall17_17Nov2017_V32_MC'
+
+def select_good_jets_FixEE2017(jet):
+        return jet.correctedJet("Uncorrected").pt() >50. or \
+        abs(jet.eta()) < 2.65 or \
+        abs(jet.eta()) > 3.139
+
+from CMGTools.H2TauTau.heppy.analyzers.JetAnalyzer import JetAnalyzer
+jets = cfg.Analyzer(
+    JetAnalyzer,
+    output = 'jets',
+    jets = 'slimmedJets',
+    do_jec = True,
+    gt_mc = gt_mc,
+    selection = select_good_jets_FixEE2017
+)
+
+from CMGTools.H2TauTau.heppy.analyzers.Sorter import Sorter
+jet_sorter = cfg.Analyzer(
+    Sorter,
+    output = 'jets_sorted',
+    src = 'jets',
+    metric = lambda jet: (jet.pt()),
+    reverse = True
+    )
+
+jets_20_unclean = cfg.Analyzer(
+    Selector,
+    'jets_20_unclean',
+    output = 'jets_20_unclean',
+    src = 'jets_sorted',
+    filter_func = lambda x : x.pt()>20 and abs(x.eta())<4.7 and x.jetID("POG_PFID_Tight")
+)
+
+
+from CMGTools.H2TauTau.heppy.analyzers.JetCleaner import JetCleaner
+jet_20 = cfg.Analyzer(
+    JetCleaner,
+    output = 'jets_20',
+    dileptons = 'dileptons_sorted',
+    jets = 'jets_20_unclean',
+    drmin = 0.5
+)
+
+jets_30 = cfg.Analyzer(
+    Selector,
+    'jets_30',
+    output = 'jets_30',
+    src = 'jets_20',
+    filter_func = lambda x : x.pt()>30 
+)
+
+
 
 # weights ================================================================
 
@@ -322,7 +397,7 @@ triggerweighter = cfg.Analyzer(
 
 from CMGTools.H2TauTau.heppy.ntuple.tools import Block , EventContent , Variable , to_leg
 v = Variable
-
+default = v.default
 
 tau1_vars = Block(
         'tau1', lambda x: x.sel_taus[0],
@@ -337,6 +412,8 @@ tau1_vars = Block(
         tau1_phi = v(lambda x: x.phi()),
         tau1_m = v(lambda x: x.mass()),
         tau1_q = v(lambda x: x.charge()),
+        tau1_gen_match = v(lambda x: x.gen_match),
+        tau1_energyScale = v(lambda x: x.energyScale),
         tau1_associatedVert_z = v(lambda x: x.associatedVertex.z()),
         )
 
@@ -353,6 +430,8 @@ tau2_vars = Block(
         tau2_phi = v(lambda x: x.phi()),
         tau2_m = v(lambda x: x.mass()),
         tau2_q = v(lambda x: x.charge()),
+        tau2_gen_match = v(lambda x: x.gen_match),
+        tau2_energyScale = v(lambda x: x.energyScale),
         tau2_associatedVert_z = v(lambda x: x.associatedVertex.z()),
         )
 
@@ -364,10 +443,24 @@ muon_vars = Block(
     muo_eta = v(lambda x: x.eta()),
     muo_phi = v(lambda x: x.phi()),  
     muo_iso = v(lambda x: x.iso_htt()), 
-    muo_d0 = v(lambda x: x.dxy()),
+    muo_dxy = v(lambda x: x.dxy()),
     muo_dz = v(lambda x: x.dz()),  
     muo_weight_trig_m = v(lambda x: getattr(x, 'weight_trigger_m', 1.)),
     muo_weight_trig_mt = v(lambda x: getattr(x, 'weight_trigger_mt', 1.)),
+)
+
+electron_vars = Block(
+        'ele', lambda x: x.sel_electrons_third_lepton_veto[0],
+    ele_id_e_mva_nt_loose = v(lambda x: x.physObj.userFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values")),
+    ele_weight_tracking = v(lambda x: getattr(x, 'weight_trk', 1. )),
+    ele_pt = v(lambda x: x.pt()),
+    ele_eta = v(lambda x: x.eta()),
+    ele_phi = v(lambda x: x.phi()),
+    ele_iso = v(lambda x: x.iso_htt()),
+    ele_d0 = v(lambda x: x.dxy()),
+    ele_dz = v(lambda x: x.dz()),
+    ele_weight_trig_e = v(lambda x: getattr(x, 'weight_trigger_e', 1.)),
+    ele_weight_trig_et = v(lambda x: getattr(x, 'weight_trigger_et', 1.)),
 )
 
 event_vars = Block(
@@ -379,16 +472,83 @@ event_vars = Block(
     n_pv = v(lambda x: len(x.vertices), int)
     )
 
+jets20 = Block(
+    'jets20', lambda x: x.jets_20,
+    n_jets_pt20 = v(lambda x: len(x), int),
+    j1_pt = v(lambda x: x[0].pt() if len(x)>0 else default),
+    j1_eta = v(lambda x: x[0].eta() if len(x)>0 else default),
+    j1_phi = v(lambda x: x[0].phi() if len(x)>0 else default),
+    # j1_bcsv = v(lambda x: x.bcsv()),
+    j1_pumva = v(lambda x: x[0].puMva('pileupJetId:fullDiscriminant') if len(x)>0 else default),
+#    j1_puid = v(lambda x: x[0].pileUpJetId_htt() if len(x)>0 else default),
+    j1_flavour_parton = v(lambda x: x[0].partonFlavour() if len(x)>0 else default),
+    j1_flavour_hadron = v(lambda x: x[0].hadronFlavour() if len(x)>0 else default),
+    j1_rawf = v(lambda x: x[0].rawFactor() if len(x)>0 else default),
+    j2_pt = v(lambda x: x[1].pt() if len(x)>1 else default),
+    j2_eta = v(lambda x: x[1].eta() if len(x)>1 else default),
+    j2_phi = v(lambda x: x[1].phi() if len(x)>1 else default),
+    j2_pumva = v(lambda x: x[1].puMva('pileupJetId:fullDiscriminant') if len(x)>1 else default ),
+#    j2_puid = v(lambda x: x[1].pileUpJetId_htt() if len(x)>1 else default ),
+    j2_flavour_parton = v(lambda x: x[1].partonFlavour() if len(x)>1 else default),
+    j2_flavour_hadron = v(lambda x: x[1].hadronFlavour() if len(x)>1 else default),
+    j2_rawf = v(lambda x: x[1].rawFactor() if len(x)>1 else default),
+    dijet_m = v(lambda x: (x[0].p4()+x[1].p4()).M() if len(x)>1 else default),
+)
+
+triggers = Block(
+    'triggers', lambda x: [getattr(x.dileptons_sorted[0], 'matchedPaths', []),x.dileptons_sorted[0]],
+    trg_singletau1 = v(lambda x : any('MediumChargedIsoPFTau180HighPtRelaxedIso_Trk50_eta2p1_v' in name for name in x[0]) and x[1].leg1().pt()>45. and abs(x[1].leg1().eta())<2.1),
+    trg_singletau2 = v(lambda x : any('MediumChargedIsoPFTau180HighPtRelaxedIso_Trk50_eta2p1_v' in name for name in x[0]) and x[1].leg2().pt()>45. and abs(x[1].leg2().eta())<2.1),
+    trg_singletau  = v(lambda x : any('MediumChargedIsoPFTau180HighPtRelaxedIso_Trk50_eta2p1_v' in name for name in x[0]) and any([tau.pt()>45. and abs(tau.eta()<2.1) for tau in [x[1].leg1(), x[1].leg2()]])),
+    trg_singlemuon_24 = v(lambda x : any('IsoMu24_v' in name for name in x[0]) and x[1].leg1().pt()>25. and abs(x[1].leg1().eta())<2.1),
+    trg_singlemuon_27 = v(lambda x : any('IsoMu27_v' in name for name in x[0]) and x[1].leg1().pt()>28. and abs(x[1].leg1().eta())<2.1),
+    trg_singleelectron_27 = v(lambda x : any('Ele27_WPTight_Gsf_v' in name for name in x[0]) and x[1].leg1().pt()>28. and abs(x[1].leg1().eta())<2.1),
+    trg_singleelectron_32 = v(lambda x : any('Ele32_WPTight_Gsf_v' in name for name in x[0]) and x[1].leg1().pt()>33. and abs(x[1].leg1().eta())<2.1),
+    trg_singleelectron_35 = v(lambda x : any('Ele35_WPTight_Gsf_v' in name for name in x[0]) and x[1].leg1().pt()>36. and abs(x[1].leg1().eta())<2.1),
+    trg_doubletau_35_mediso = v(lambda x : any('DoubleMediumChargedIsoPFTau35_Trk1_eta2p1_Reg_v' in name for name in x[0]) and all([tau.pt()>40. and abs(tau.eta()<2.1) for tau in [x[1].leg1(), x[1].leg2()]])),
+    trg_doubletau_35_tightiso_tightid = v(lambda x : any('DoubleTightChargedIsoPFTau35_Trk1_TightID_eta2p1_Reg_v' in name for name in x[0]) and all([tau.pt()>40. and abs(tau.eta()<2.1) for tau in [x[1].leg1(), x[1].leg2()]])),
+    trg_doubletau_40_mediso_tightid = v(lambda x : any('DoubleMediumChargedIsoPFTau40_Trk1_TightID_eta2p1_Reg_v' in name for name in x[0]) and all([tau.pt()>45. and abs(tau.eta()<2.1) for tau in [x[1].leg1(), x[1].leg2()]])),
+    trg_doubletau_40_tightiso = v(lambda x : any('DoubleTightChargedIsoPFTau40_Trk1_eta2p1_Reg_v' in name for name in x[0]) and all([tau.pt()>45. and abs(tau.eta()<2.1) for tau in [x[1].leg1(), x[1].leg2()]])),
+    trg_crossmuon_mu24tau20 = v(lambda x : any('IsoMu24_eta2p1_LooseChargedIsoPFTau20_SingleL1_v' in name for name in x[0]) and x[1].leg1().pt()>25. and abs(x[1].leg1().eta())<2.1 and x[1].leg2().pt()>21. and abs(x[1].leg2().eta())<2.1),
+    trg_crossmuon_mu20tau27 = v(lambda x : any('IsoMu20_eta2p1_LooseChargedIsoPFTau27_eta2p1_CrossL1_v' in name for name in x[0]) and x[1].leg1().pt()>21. and abs(x[1].leg1().eta())<2.1 and x[1].leg2().pt()>32. and abs(x[1].leg2().eta())<2.1),
+    trg_crossele_ele24tau30 = v(lambda x : any('Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTau30_eta2p1_CrossL1_v' in name for name in x[0]) and x[1].leg1().pt()>25. and abs(x[1].leg1().eta())<2.1 and x[1].leg2().pt()>35. and abs(x[1].leg2().eta())<2.1),
+    trg_muonelectron_mu8ele23 = v(lambda x : any('Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v' in name for name in x[0]) and x[1].leg1().pt()>24. and abs(x[1].leg1().eta())<2.5 and x[1].leg2().pt()>9. and abs(x[1].leg2().eta())<2.4),
+    trg_muonelectron_mu12ele23 = v(lambda x : any('Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v' in name for name in x[0]) and x[1].leg1().pt()>24.  and abs(x[1].leg1().eta())<2.5 and x[1].leg2().pt()>13.and abs(x[1].leg2().eta())<2.4),
+    trg_muonelectron_mu23ele12 = v(lambda x : any('Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v' in name for name in x[0]) and x[1].leg1().pt()>13.  and abs(x[1].leg1().eta())<2.5 and x[1].leg2().pt()>24.and abs(x[1].leg2().eta())<2.4)
+)
+
+triggers_matched = Block(
+    'triggers_matched', lambda x: [getattr(x.dileptons_sorted[0], 'matchedPaths', []),x.dileptons_sorted[0]],
+    trg_singletau_matched  = v(lambda x : any('MediumChargedIsoPFTau180HighPtRelaxedIso_Trk50_eta2p1_v' in name for name in x[0])),
+    trg_singlemuon_24_matched = v(lambda x : any('IsoMu24_v' in name for name in x[0])),
+    trg_singlemuon_27_matched = v(lambda x : any('IsoMu27_v' in name for name in x[0])),
+    trg_singleelectron_27_matched = v(lambda x : any('Ele27_WPTight_Gsf_v' in name for name in x[0])),
+    trg_singleelectron_32_matched = v(lambda x : any('Ele32_WPTight_Gsf_v' in name for name in x[0])),
+    trg_singleelectron_35_matched = v(lambda x : any('Ele35_WPTight_Gsf_v' in name for name in x[0])),
+    trg_doubletau_35_mediso_matched = v(lambda x : any('DoubleMediumChargedIsoPFTau35_Trk1_eta2p1_Reg_v' in name for name in x[0])),
+    trg_doubletau_35_tightiso_tightid_matched = v(lambda x : any('DoubleTightChargedIsoPFTau35_Trk1_TightID_eta2p1_Reg_v' in name for name in x[0])),
+    trg_doubletau_40_mediso_tightid_matched = v(lambda x : any('DoubleMediumChargedIsoPFTau40_Trk1_TightID_eta2p1_Reg_v' in name for name in x[0])),
+    trg_doubletau_40_tightiso_matched = v(lambda x : any('DoubleTightChargedIsoPFTau40_Trk1_eta2p1_Reg_v' in name for name in x[0])),
+    trg_crossmuon_mu24tau20_matched = v(lambda x : any('IsoMu24_eta2p1_LooseChargedIsoPFTau20_SingleL1_v' in name for name in x[0])),
+    trg_crossmuon_mu20tau27_matched = v(lambda x : any('IsoMu20_eta2p1_LooseChargedIsoPFTau27_eta2p1_CrossL1_v' in name for name in x[0])),
+    trg_crossele_ele24tau30_matched = v(lambda x : any('Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTau30_eta2p1_CrossL1_v' in name for name in x[0])),
+    trg_muonelectron_mu8ele23_matched = v(lambda x : any('Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v' in name for name in x[0])),
+    trg_muonelectron_mu12ele23_matched = v(lambda x : any('Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v' in name for name in x[0])),
+    trg_muonelectron_mu23ele12_matched = v(lambda x : any('Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v' in name for name in x[0]))
+)
 
 
 tautau = EventContent(
     [
 #    metvars,
     event_vars,
-#    tau1_vars,
-#    tau2_vars,
+    tau1_vars,
+    tau2_vars,
+#    jets20
+    triggers,
+    triggers_matched
 #    electron_vars,
-    muon_vars
+#    muon_vars
 #    dilepton_vars
      ]
 )
@@ -415,24 +575,48 @@ sequence_beforedil = cfg.Sequence([
         json,
         skim,
         vertex,
-#        taus,
-#        sel_taus,
-#	two_tau,
+        taus,
 #	at_least_one_tau
         muons,
-	sel_muons_third_lepton_veto,
-	at_least_one_muo,
-#        electrons,
-#        genmatcher,
-#        tauenergyscale,
+#	sel_muons_third_lepton_veto,
+#	at_least_one_muo,
+        electrons,
+#	sel_electrons_third_lepton_veto,
+#	at_least_one_ele
+        genmatcher,
+        tauenergyscale,
+#        sel_taus,
+#	two_tau,
 ])
 
+sequence_jets = cfg.Sequence([
+        jets,
+       jet_sorter,
+       jets_20_unclean,
+       jet_20,
+       jets_30
+#       btagger,
+#       bjets_20
+])
+
+sequence_afterdil = cfg.Sequence([
+        trigger, 
+        trigger_match,
+#        met_filters,
+#        lheweight,
+#        httgenana,
+#        pileup, 
+#        njets_ana
+]) 
+
 sequence = sequence_beforedil
-#sequence.extend( sequence_dilepton )
-#sequence.extend( sequence_afterdil )
+sequence.extend( sequence_dilepton )
+sequence.extend( sequence_afterdil )
+#sequence.extend(sequence_jets)
 #sequence.append(tauidweighter_general)
 #sequence.append(tauidweighter)
 #sequence.append(triggerweighter)
+sequence.append(debugger)
 sequence.append(ntuple)
 
 
