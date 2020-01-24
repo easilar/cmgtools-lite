@@ -28,8 +28,11 @@ class Tau(NanoObject):
 	def p4(self):
 		return self.lv
 
-	def rawpt(self):
-		return self.pt()
+	def pt(self):
+		if hasattr(self,"lv"):	
+			return super().p4().Pt()
+		else:
+			return super().pt()
 
 	def __getattr__(self, attr):
 		if attr == 'gen_match':

@@ -160,8 +160,8 @@ tauenergyscale = cfg.Analyzer(
 )
 
 from CMGTools.H2TauTau.heppy.sequence.common import debugger
-debugger.condition = None #lambda event : True # lambda event : len(event.sel_taus)>2
-#debugger.condition = lambda event : True # lambda event : len(event.sel_taus)>2
+#debugger.condition = None #lambda event : True # lambda event : len(event.sel_taus)>2
+debugger.condition = lambda event : True # lambda event : len(event.sel_taus)>2
 
 ########### For after dilepton
 
@@ -371,7 +371,7 @@ nano_tau1_vars = Block(
         tau1_idDecayModeNewDMs = v(lambda x: x.tauID('decayModeFindingNewDMs')),
 	tau1_idMVAoldDM2017v2 = v(lambda x: x.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')),
 	tau1_gen_match = v(lambda x: x.gen_match),
-	#tau1_energyScale = v(lambda x: x.energyScale)
+	tau1_energyScale = v(lambda x: x.energyScale)
     	)
 
 
@@ -389,7 +389,7 @@ nano_tau2_vars = Block(
         tau2_idDecayModeNewDMs = v(lambda x: x.tauID('decayModeFindingNewDMs')),
 	tau2_idMVAoldDM2017v2 = v(lambda x: x.tauID('byVVLooseIsolationMVArun2017v2DBoldDMwLT2017')),
 	tau2_gen_match = v(lambda x: x.gen_match),
-	#tau2_energyScale = v(lambda x: x.energyScale)
+	tau2_energyScale = v(lambda x: x.energyScale)
     	)
 
 
@@ -485,9 +485,9 @@ nano_tautau = EventContent(
     [
 #    metvars,
     event_vars,
-#    nano_tau1_vars,
-#    nano_tau2_vars,
-    jets20
+    nano_tau1_vars,
+    nano_tau2_vars,
+#   jets20
 #    electron_vars,
 #    muon_vars
 #    dilepton_vars
@@ -528,7 +528,7 @@ sequence_beforedil = cfg.Sequence([
 #       muons,
 #       electrons,
 #        genmatcher
-#	tauenergyscale,
+	tauenergyscale,
 #        sel_taus,
 #	two_tau
 #	met_reader,
@@ -545,8 +545,8 @@ sequence_jets = cfg.Sequence([
         jets_30,
 ])
 sequence = sequence_beforedil
-sequence.extend( sequence_dilepton )
-sequence.extend(sequence_jets)
+#sequence.extend( sequence_dilepton )
+#sequence.extend(sequence_jets)
 #sequence.append(tauidweighter_general)
 #sequence.append(tauidweighter)
 sequence.append(printer)

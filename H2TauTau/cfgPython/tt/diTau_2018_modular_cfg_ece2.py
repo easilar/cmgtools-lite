@@ -342,6 +342,25 @@ jets_30 = cfg.Analyzer(
     filter_func = lambda x : x.pt()>30 
 )
 
+# Trigger  ===============================================================
+from CMGTools.H2TauTau.proto.analyzers.TriggerAnalyzer import TriggerAnalyzer
+
+trigger = cfg.Analyzer(
+    TriggerAnalyzer,
+    name='TriggerAnalyzer',
+    addTriggerObjects=True,
+    requireTrigger=False,
+    usePrescaled=False
+)
+
+
+from CMGTools.H2TauTau.heppy.analyzers.TrigMatcher import TrigMatcher    
+trigger_match = cfg.Analyzer(
+    TrigMatcher,
+    src='dileptons_sorted',
+    require_all_matched = True
+)
+
 
 
 # weights ================================================================
