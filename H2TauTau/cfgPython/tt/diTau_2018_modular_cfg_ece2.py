@@ -321,7 +321,7 @@ jets_20_unclean = cfg.Analyzer(
     'jets_20_unclean',
     output = 'jets_20_unclean',
     src = 'jets_sorted',
-    filter_func = lambda x : x.pt()>20 and abs(x.eta())<4.7 and x.jetID("POG_PFID_Tight")
+    filter_func = lambda x : x.pt()>20 and abs(x.eta())<4.7 and x.jetID("POG_PFID_Tight" )
 )
 
 
@@ -561,11 +561,11 @@ tautau = EventContent(
     [
 #    metvars,
     event_vars,
-    tau1_vars,
-    tau2_vars,
-#    jets20
-    triggers,
-    triggers_matched
+#    tau1_vars,
+#    tau2_vars,
+    jets20
+#    triggers,
+#    triggers_matched
 #    electron_vars,
 #    muon_vars
 #    dilepton_vars
@@ -596,14 +596,14 @@ sequence_beforedil = cfg.Sequence([
         vertex,
         taus,
 #	at_least_one_tau
-        muons,
+#        muons,
 #	sel_muons_third_lepton_veto,
 #	at_least_one_muo,
-        electrons,
+#        electrons,
 #	sel_electrons_third_lepton_veto,
 #	at_least_one_ele
-        genmatcher,
-        tauenergyscale,
+#        genmatcher,
+#        tauenergyscale,
 #        sel_taus,
 #	two_tau,
 ])
@@ -613,25 +613,25 @@ sequence_jets = cfg.Sequence([
        jet_sorter,
        jets_20_unclean,
        jet_20,
-       jets_30
+#       jets_30
 #       btagger,
 #       bjets_20
 ])
 
 sequence_afterdil = cfg.Sequence([
-        trigger, 
-        trigger_match,
-#        met_filters,
-#        lheweight,
-#        httgenana,
-#        pileup, 
-#        njets_ana
+#       trigger, 
+#       trigger_match,
+#       met_filters,
+#       lheweight,
+#       httgenana,
+#       pileup, 
+#       njets_ana
 ]) 
 
 sequence = sequence_beforedil
 sequence.extend( sequence_dilepton )
-sequence.extend( sequence_afterdil )
-#sequence.extend(sequence_jets)
+#sequence.extend( sequence_afterdil )
+sequence.extend(sequence_jets)
 #sequence.append(tauidweighter_general)
 #sequence.append(tauidweighter)
 #sequence.append(triggerweighter)

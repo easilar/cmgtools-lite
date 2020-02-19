@@ -1,14 +1,9 @@
 import ROOT
 from nano_object import NanoObject
 
-
 class Tau(NanoObject):
-
-
 	def __init__(self, *args, **kwargs):
 		super(Tau, self).__init__(*args, **kwargs)
-		self.rawp4 = ROOT.math.PtEtaPhiMLorentzVector(self.pt(),self.eta(),self.phi(),self.mass())
-		self.lv = self.rawp4
 
 	def leadChargedHadrCand(self):
 		return self #FIXME
@@ -26,13 +21,8 @@ class Tau(NanoObject):
 		return 15*self.charge()
 
 	def p4(self):
-		return self.lv
+		return ROOT.math.PtEtaPhiMLorentzVector(self.pt(),self.eta(),self.phi(),self.mass())
 
-	def pt(self):
-		if hasattr(self,"lv"):	
-			return super().p4().Pt()
-		else:
-			return super().pt()
 
 	def __getattr__(self, attr):
 		if attr == 'gen_match':
@@ -43,8 +33,14 @@ class Tau(NanoObject):
 		else:
 			return super(Tau,self).__getattr__(attr)
 
-	def scaleEnergy( self, scale ):
-		p4 = self.rawp4
-		p4 *= scale
-		self.lv = p4
-
+#def scaleEnergy( self, scale ):
+#	p4 = self.p4()
+#	p4 *= scale
+#	print(p4)
+#	setattr(self, "lv", p4)
+#
+#def pt(self):
+#	#if not hasattr(self,"lv"):	
+#	return self.pt()
+#	#else:
+#	#	return self.lv.Pt()
